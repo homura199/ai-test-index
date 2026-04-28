@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能体实验平台</title>
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: rgba(255, 255, 255, 0.95); padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 320px; text-align: center; transition: all 0.3s ease; }
+        .login-card h3 { margin-top: 0; color: #333; margin-bottom: 25px; font-size: 22px; }
+        .login-card input { box-sizing: border-box; width: 100%; padding: 12px 15px; margin: 10px 0; border: 1px solid #e1e4e8; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .login-card input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+        .login-card button { width: 100%; padding: 14px; background: #1677ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 20px; transition: background 0.2s, transform 0.1s; }
+        .login-card button:hover { background: #0958d9; }
+        .login-card button:active { transform: scale(0.98); }
+        /* 聊天容器：确保占满全屏 */
+        #coze-container { display: none; width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card" id="login-box">
+        <h3>实验数据录入</h3>
+        <input type="text" id="className" placeholder="请输入班级 (例: 计科1班)">
+        <input type="text" id="studentId" placeholder="请输入学号 (例: 2024001)">
+        <input type="text" id="sessionNum" placeholder="请输入课次 (例: 1)">
+        <button onclick="startChat()">进入智能体</button>
+    </div>
+
+    <div id="coze-container"></div>
+
+    <script>
+        // 你在腾讯云配置好的专属 Token 派发接口
+        const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
+
+        async function startChat() {
+            const cls = document.getElementById('className').value.trim();
+            const stu = document.getElementById('studentId').value.trim();
+            const ses = document.getElementById('sessionNum').value.trim();
+
+            if (!cls || !stu || !ses) {
+                alert("班级、学号和课次都必须填写完整哦！");
+                return;
+            }
+
+            // 拼接唯一的用户 ID，用于后端数据隔离
+            const uniqueUserId = `${cls}_${stu}_${ses}`; 
+            
+            const btn = document.querySelector('button');
+            btn.innerText = "正在分配专属通道...";
+            btn.disabled = true;
+
+            try {
+                // 1. 向腾讯云请求 Token
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                if (result.code !== 0) throw new Error("获取 Token 失败");
+                const dynamicToken = result.data.token;
+
+                // 2. 隐藏登录框，显示全屏聊天框
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('coze-container').style.display = 'block';
+
+                // 3. 初始化并挂载扣子聊天组件
+                const chatClient = new window.CozeWebSDK.WebChatClient({
+                    config: { 
+                        bot_id: '7629244922654851135' 
+                    },
+                    auth: {
+                        type: 'token',
+                        token: dynamicToken,
+                        onRefreshToken: async () => {
+                            const refreshResponse = await fetch(API_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                            const refreshResult = await refreshResponse.json();
+                            return refreshResult.data.token;
+                        }
+                    },
+                    userInfo: {
+                        id: uniqueUserId,
+                        nickname: stu
+                    },
+                    ui: {
+                        asstBtn: {
+                            isNeed: false // 关闭悬浮小球
+                        },
+                        chatBot: {
+                            el: document.getElementById('coze-container'), // 挂载到容器
+                            layout: 'pc', // 使用宽屏布局
+                            width: '100%' // 宽度拉满
+                        }
+                    }
+                });
+
+                // 4. 强制唤醒并展开聊天面板
+                chatClient.showChatBot();
+
+            } catch (error) {
+                alert("网络连接异常，请按 F12 检查控制台报错！");
+                console.error(error);
+                btn.innerText = "进入智能体";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
