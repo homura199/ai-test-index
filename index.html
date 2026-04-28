@@ -22,7 +22,7 @@
             justify-content: center;
             align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
-            /* 💡 高级弥散背景 */
+            /* 背景渐变效果 */
             background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
                 radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
                 radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
@@ -32,7 +32,7 @@
             overflow: hidden;
         }
 
-        /* 💡 玻璃卡片主体 */
+        /* 登录卡片样式 */
         .login-card {
             position: relative;
             width: 360px;
@@ -48,7 +48,7 @@
             z-index: 10;
         }
 
-        /* 特效1：点击后的输入框缩小模糊 */
+        /* 输入框淡出效果 */
         .fade-out {
             opacity: 0;
             transform: scale(0.9);
@@ -56,7 +56,7 @@
             pointer-events: none;
         }
 
-        /* 特效2：加载卡片退场（向上飞走） */
+        /* 卡片退出动画 */
         .card-exit {
             opacity: 0 !important;
             transform: scale(0.9) translateY(-40px) !important;
@@ -116,7 +116,7 @@
             filter: brightness(1.1);
         }
 
-        /* 加载转圈 */
+        /* 加载动画 */
         #loader-wrapper {
             display: none;
             flex-direction: column;
@@ -152,7 +152,7 @@
             }
         }
 
-        /* 💡 全屏聊天容器：带入场动效 */
+        /* 聊天容器 */
         #coze-container {
             display: none;
             position: fixed;
@@ -175,7 +175,7 @@
             filter: blur(0);
         }
 
-        /* 物理屏蔽右上角 */
+        /* 屏蔽右上角区域 */
         #top-shield {
             display: none;
             position: fixed;
@@ -188,7 +188,7 @@
             cursor: default;
         }
 
-        /* 屏蔽SDK内多余按钮 */
+        /* 隐藏多余按钮 */
         div[class*="efa8c"],
         div[class*="e4f8c"] {
             display: none !important;
@@ -227,7 +227,7 @@
             const ses = document.getElementById('sessionNum').value.trim();
             if (!cls || !stu || !ses) { alert("请填写完整信息！"); return; }
 
-            // 1. 特效：输入框组缩小并模糊消失
+            // 淡出输入框
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
             inputGroup.classList.add('fade-out');
@@ -238,7 +238,7 @@
             }, 400);
 
             try {
-                // 2. 获取 Token 并校验
+                // 获取令牌
                 const response = await fetch(API_URL, { method: 'POST' });
                 const result = await response.json();
                 if (!result.data || !result.data.token) throw new Error("Token Missing");
@@ -247,7 +247,7 @@
                 document.getElementById('loading-text').innerText = "身份验证成功，正在进入...";
                 await new Promise(r => setTimeout(r, 800));
 
-                // 3. 特效：加载卡片整体退场
+                // 退出卡片
                 const loginBox = document.getElementById('login-box');
                 loginBox.classList.add('card-exit');
 
@@ -257,11 +257,11 @@
                     container.style.display = 'block';
                     container.offsetHeight; // 强制重绘
 
-                    // 4. 特效：聊天窗口自然蹦出
+                    // 显示聊天窗口
                     container.classList.add('show-time');
                     document.getElementById('top-shield').style.display = 'block';
 
-                    // 5. 初始化 SDK (固定使用 token 类型)
+                    // 初始化聊天客户端
                     const chatClient = new window.CozeWebSDK.WebChatClient({
                         config: { bot_id: BOT_ID },
                         auth: {
@@ -287,7 +287,7 @@
 
                     chatClient.showChatBot();
 
-                    // 6. 持续清理逃生按钮
+                    // 清理按钮
                     setInterval(() => {
                         const svgs = document.querySelectorAll('svg');
                         svgs.forEach(svg => {
