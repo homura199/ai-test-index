@@ -1,76 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
-<!-- 
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
--->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 智能实验教学平台</title>
-    <!-- 引入 Coze 聊天 SDK，用于集成智能对话功能 -->
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
     <style>
-        /* 加载卡片消失时的动画效果，让界面切换更流畅 */
-        .card-exit {
-            opacity: 0 !important;
-            transform: scale(0.9) translateY(-20px) !important;
-            filter: blur(20px) !important;
-            transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
-        }
-
-        /* 对话框进入时的动画姿态，从下方滑入并逐渐清晰 */
-        #coze-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #fff;
-            z-index: 9999;
-            /* 初始状态：透明、位移、模糊 */
-            opacity: 0;
-            transform: translateY(40px) scale(0.98);
-            filter: blur(10px);
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-            /* 苹果风格的减速曲线 */
-        }
-
-        /* 用来触发进入动画的CSS类，让对话框自然显示 */
-        #coze-container.show-time {
-            display: block !important;
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0);
-        }
-
-        /* 定义一些全局变量，方便后续使用 */
         :root {
             --glass-bg: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.3);
             --primary-color: #007AFF;
         }
 
-        /* 页面整体样式，居中显示，背景是渐变色 */
         body {
             margin: 0;
+            padding: 0;
             height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
+            /* 💡 高级弥散背景 */
             background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
                 radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
                 radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
@@ -80,7 +32,7 @@
             overflow: hidden;
         }
 
-        /* 登录卡片的样式，毛玻璃效果 */
+        /* 💡 玻璃卡片主体 */
         .login-card {
             position: relative;
             width: 360px;
@@ -92,25 +44,39 @@
             border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(255, 255, 255, 0.3) inset;
             text-align: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            z-index: 10;
         }
 
-        /* 标题样式，使用渐变色 */
+        /* 特效1：点击后的输入框缩小模糊 */
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.9);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        /* 特效2：加载卡片退场（向上飞走） */
+        .card-exit {
+            opacity: 0 !important;
+            transform: scale(0.9) translateY(-40px) !important;
+            filter: blur(20px) !important;
+        }
+
         .login-card h3 {
             margin: 0 0 35px 0;
             font-size: 26px;
             font-weight: 700;
+            letter-spacing: -0.8px;
             background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* 输入组的过渡效果 */
         #input-group {
             transition: all 0.5s ease;
         }
 
-        /* 输入框样式 */
         input {
             width: 100%;
             box-sizing: border-box;
@@ -121,15 +87,15 @@
             border-radius: 16px;
             font-size: 15px;
             outline: none;
+            transition: all 0.3s ease;
         }
 
-        /* 输入框聚焦时的样式 */
         input:focus {
             background: rgba(255, 255, 255, 0.6);
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
         }
 
-        /* 按钮样式 */
         button {
             width: 100%;
             margin-top: 25px;
@@ -142,17 +108,15 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s ease;
         }
 
-        /* 淡出效果类 */
-        .fade-out {
-            opacity: 0;
-            transform: scale(0.9);
-            filter: blur(10px);
-            pointer-events: none;
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
 
-        /* 加载器包装器，默认隐藏 */
+        /* 加载转圈 */
         #loader-wrapper {
             display: none;
             flex-direction: column;
@@ -161,7 +125,6 @@
             animation: fadeIn 0.6s ease forwards;
         }
 
-        /* 旋转加载图标 */
         .spinner {
             width: 50px;
             height: 50px;
@@ -171,14 +134,12 @@
             animation: spin 1s linear infinite;
         }
 
-        /* 旋转动画 */
         @keyframes spin {
             100% {
                 transform: rotate(360deg);
             }
         }
 
-        /* 淡入动画 */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -191,38 +152,52 @@
             }
         }
 
-        /* 全屏容器，用于显示聊天界面 */
+        /* 💡 全屏聊天容器：带入场动效 */
         #coze-container {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
             background: #fff;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            filter: blur(10px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 隐藏所有功能性图标按钮，比如关闭、新建等 */
+        #coze-container.show-time {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+
+        /* 物理屏蔽右上角 */
+        #top-shield {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 60px;
+            background: transparent;
+            z-index: 10000;
+            cursor: default;
+        }
+
+        /* 屏蔽SDK内多余按钮 */
         div[class*="efa8c"],
-        div[class*="e4f8c"],
-        button[class*="icon-btn"],
-        [aria-label*="close"],
-        [aria-label*="关闭"],
-        [aria-label*="new chat"] {
+        div[class*="e4f8c"] {
             display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        /* 确保发送按钮不被隐藏 */
-        button[class*="primary"] {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
     </style>
 </head>
 
 <body>
-    <!-- 登录卡片，包含输入表单 -->
+
     <div class="login-card" id="login-box">
         <div id="input-group">
             <h3>实验数据录入</h3>
@@ -231,78 +206,74 @@
             <input type="text" id="sessionNum" placeholder="请输入课次 (例: 1)">
             <button onclick="startChat()">进入智能体</button>
         </div>
-        <!-- 加载动画区域 -->
         <div id="loader-wrapper">
             <div class="spinner"></div>
-            <p style="margin-top:20px; color:rgba(0,0,0,0.5);">正在初始化实验环境...</p>
+            <p id="loading-text" style="margin-top:20px; color:rgba(0,0,0,0.5); font-weight:500;">正在建立安全连接...</p>
         </div>
     </div>
 
-    <!-- Coze 聊天容器 -->
     <div id="coze-container"></div>
+    <div id="top-shield"></div>
 
     <script>
-        // API 地址和机器人 ID
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
         const BOT_ID = "7629244922654851135";
 
-        // 防止用户意外关闭页面，提醒保存数据
-        window.addEventListener('beforeunload', function (e) {
-            e.preventDefault();
-            e.returnValue = '实验数据正在记录中，确定退出吗？';
-            return '实验数据正在记录中，确定退出吗？';
-        });
+        window.onbeforeunload = function () { return "实验正在进行，确定离开吗？"; };
 
-        // 开始聊天的函数
         async function startChat() {
-            // 获取输入值
             const cls = document.getElementById('className').value.trim();
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value.trim();
+            if (!cls || !stu || !ses) { alert("请填写完整信息！"); return; }
 
-            // 检查输入是否完整
-            if (!cls || !stu || !ses) {
-                alert("请填写完整的实验信息！");
-                return;
-            }
-
-            // 显示加载动画
+            // 1. 特效：输入框组缩小并模糊消失
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
             inputGroup.classList.add('fade-out');
+
             setTimeout(() => {
                 inputGroup.style.display = 'none';
                 loaderWrapper.style.display = 'flex';
             }, 400);
 
-            // 生成唯一用户 ID
-            const uniqueUserId = `${cls}_${stu}_${ses}`;
-
             try {
-                // 请求动态 token
+                // 2. 获取 Token 并校验
                 const response = await fetch(API_URL, { method: 'POST' });
                 const result = await response.json();
+                if (!result.data || !result.data.token) throw new Error("Token Missing");
                 const dynamicToken = result.data.token;
 
-                // 更新加载文字
-                document.querySelector('#loader-wrapper p').innerText = "环境准备就绪，欢迎进入...";
+                document.getElementById('loading-text').innerText = "身份验证成功，正在进入...";
                 await new Promise(r => setTimeout(r, 800));
 
-                // 卡片退场动画
+                // 3. 特效：加载卡片整体退场
                 const loginBox = document.getElementById('login-box');
                 loginBox.classList.add('card-exit');
 
-                // 准备对话框
                 setTimeout(() => {
                     loginBox.style.display = 'none';
-
                     const container = document.getElementById('coze-container');
                     container.style.display = 'block';
                     container.offsetHeight; // 强制重绘
-                    container.classList.add('show-time');
 
-                    // 初始化聊天客户端
+                    // 4. 特效：聊天窗口自然蹦出
+                    container.classList.add('show-time');
+                    document.getElementById('top-shield').style.display = 'block';
+
+                    // 5. 初始化 SDK (固定使用 token 类型)
                     const chatClient = new window.CozeWebSDK.WebChatClient({
+                        config: { bot_id: BOT_ID },
+                        auth: {
+                            type: 'token',
+                            token: dynamicToken,
+                            onRefreshToken: async () => {
+                                const res = await fetch(API_URL, { method: 'POST' });
+                                const resJson = await res.json();
+                                return resJson.data.token;
+                            }
+                        },
+                        userInfo: { id: `${cls}_${stu}_${ses}`, nickname: stu },
                         ui: {
                             asstBtn: { isNeed: false },
                             chatBot: {
@@ -315,11 +286,23 @@
                     });
 
                     chatClient.showChatBot();
-                }, 500);
+
+                    // 6. 持续清理逃生按钮
+                    setInterval(() => {
+                        const svgs = document.querySelectorAll('svg');
+                        svgs.forEach(svg => {
+                            if (svg.innerHTML.includes('M4.96977') || svg.innerHTML.includes('M13.4997')) {
+                                const target = svg.closest('button') || svg.closest('div');
+                                if (target) target.remove();
+                            }
+                        });
+                    }, 500);
+
+                }, 600);
 
             } catch (error) {
-                // 错误处理
-                alert("实验环境连接失败，请检查网络！");
+                console.error(error);
+                alert("加载失败，请刷新页面重试！");
                 inputGroup.style.display = 'block';
                 inputGroup.classList.remove('fade-out');
                 loaderWrapper.style.display = 'none';
@@ -328,18 +311,4 @@
     </script>
 </body>
 
-<!-- 
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
-     /\_/\  
-    ( o.o ) 
-     > ^ <
--->
 </html>
