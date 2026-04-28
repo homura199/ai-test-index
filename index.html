@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 智能实验教学平台</title>
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
     <style>
@@ -18,21 +17,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-            /* 💡 高级弥散背景：多色径向渐变叠加 */
-            background-color: #e5e5f7;
-            background: 
-                radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                        radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
             background-attachment: fixed;
             overflow: hidden;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* 💡 玻璃卡片主体 */
         .login-card {
             position: relative;
             width: 360px;
@@ -47,105 +41,45 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 标题样式 */
         .login-card h3 {
             margin: 0 0 35px 0;
             font-size: 26px;
             font-weight: 700;
-            letter-spacing: -0.8px;
             background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* 输入框容器 */
-        #input-group {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* 输入框样式 */
+        #input-group { transition: all 0.5s ease; }
         input {
-            width: 100%;
-            box-sizing: border-box;
-            margin: 12px 0;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
+            width: 100%; box-sizing: border-box; margin: 12px 0; padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px; font-size: 15px; outline: none;
         }
-
-        input:focus {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-        }
-
-        /* 按钮样式 */
+        input:focus { background: rgba(255, 255, 255, 0.6); border-color: var(--primary-color); }
         button {
-            width: 100%;
-            margin-top: 25px;
-            padding: 18px;
+            width: 100%; margin-top: 25px; padding: 18px;
             background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
-            color: white;
-            border: none;
-            border-radius: 18px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
-            transition: all 0.3s ease;
+            color: white; border: none; border-radius: 18px; font-size: 17px; font-weight: 600;
+            cursor: pointer; box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        /* 💡 动画状态：收缩消失 */
-        .fade-out {
-            opacity: 0;
-            transform: scale(0.9);
-            filter: blur(10px);
-            pointer-events: none;
-        }
-
-        /* 💡 加载动画样式 */
+        .fade-out { opacity: 0; transform: scale(0.9); filter: blur(10px); pointer-events: none; }
+        
         #loader-wrapper {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
             animation: fadeIn 0.6s ease forwards;
         }
-
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 122, 255, 0.1);
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
+            width: 50px; height: 50px; border: 3px solid rgba(0, 122, 255, 0.1);
+            border-top: 3px solid var(--primary-color); border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
-        #loading-text {
-            margin-top: 20px;
-            font-size: 14px;
-            color: rgba(0, 0, 0, 0.5);
-            font-weight: 500;
-        }
-
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
 
-        /* 聊天容器：占据全屏 */
-        #coze-container {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-        }
+        /* 💡 全屏容器 */
+        #coze-container { display: none; width: 100vw; height: 100vh; background: #fff; }
     </style>
 </head>
 <body>
@@ -158,10 +92,9 @@
             <input type="text" id="sessionNum" placeholder="请输入课次 (例: 1)">
             <button onclick="startChat()">进入智能体</button>
         </div>
-
         <div id="loader-wrapper">
             <div class="spinner"></div>
-            <p id="loading-text">正在建立安全连接...</p>
+            <p style="margin-top:20px; color:rgba(0,0,0,0.5);">正在初始化实验环境...</p>
         </div>
     </div>
 
@@ -171,22 +104,25 @@
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
         const BOT_ID = "7629244922654851135";
 
+        // 💡 防误关守护：当学生试图关闭网页时弹出提醒
+        window.onbeforeunload = function() {
+            return "实验正在进行中，关闭网页将导致进度丢失，确定退出吗？";
+        };
+
         async function startChat() {
             const cls = document.getElementById('className').value.trim();
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value.trim();
 
             if (!cls || !stu || !ses) {
-                alert("请填写完整的实验信息哦！");
+                alert("请填写完整的实验信息！");
                 return;
             }
 
-            // 1. 触发切换动画
+            // 1. 启动加载动画
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
-            
             inputGroup.classList.add('fade-out');
-            
             setTimeout(() => {
                 inputGroup.style.display = 'none';
                 loaderWrapper.style.display = 'flex';
@@ -195,24 +131,17 @@
             const uniqueUserId = `${cls}_${stu}_${ses}`; 
 
             try {
-                // 2. 获取 Token
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
+                const response = await fetch(API_URL, { method: 'POST' });
                 const result = await response.json();
-                if (result.code !== 0) throw new Error("Token Error");
                 const dynamicToken = result.data.token;
 
-                document.getElementById('loading-text').innerText = "身份验证成功，正在进入...";
-                await new Promise(r => setTimeout(r, 600));
+                // 2. 模拟加载停顿，增加稳定性
+                await new Promise(r => setTimeout(r, 800));
 
-                // 3. 切换到聊天容器
                 document.getElementById('login-box').style.display = 'none';
                 document.getElementById('coze-container').style.display = 'block';
 
-                // 4. 初始化 SDK
+                // 3. 初始化 SDK
                 const chatClient = new window.CozeWebSDK.WebChatClient({
                     config: { bot_id: BOT_ID },
                     auth: {
@@ -230,7 +159,9 @@
                         chatBot: {
                             el: document.getElementById('coze-container'),
                             layout: 'pc',
-                            width: '100%'
+                            width: '100%',
+                            // 💡 核心锁定代码：隐藏页眉
+                            showHeader: false 
                         }
                     }
                 });
@@ -238,9 +169,7 @@
                 chatClient.showChatBot();
 
             } catch (error) {
-                console.error(error);
-                alert("网络繁忙，请稍后刷新重试！");
-                // 出错时重置 UI
+                alert("实验环境连接失败，请检查网络！");
                 inputGroup.style.display = 'block';
                 inputGroup.classList.remove('fade-out');
                 loaderWrapper.style.display = 'none';
