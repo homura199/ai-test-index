@@ -1,0 +1,31 @@
+name: Deploy Entire Folder to Tencent COS
+
+on:
+  push:
+    branches: [ main ] # 只有 push 到 main 分支时触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Python and COSCMD
+        run: pip install coscmd
+
+      - name: Configure COSCMD
+        run: |
+          coscmd config \
+          -a ${{ secrets.TENCENT_SECRET_ID }} \
+          -s ${{ secrets.TENCENT_SECRET_KEY }} \
+          -b ${{ secrets.TENCENT_COS_BUCKET }} \
+          -r ${{ secrets.TENCENT_COS_REGION }}
+
+      - name: Upload Entire Folder to COS
+        # -r 代表递归上传整个文件夹
+        # ./ 代表当前代码仓库根目录
+        # / 代表上传到存储桶的根目录
+        # --ignore 后面排除掉不需要上线的文件，防止污染存储桶
+        run: |
+          coscmd upload -r ./ / --ignore ".git/*,.github/*,README.md,.gitignore"
