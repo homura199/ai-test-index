@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 智能实验教学平台</title>
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
     <style>
@@ -19,10 +21,10 @@
             align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
             background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
-                        radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
             background-attachment: fixed;
             overflow: hidden;
         }
@@ -50,38 +52,115 @@
             -webkit-text-fill-color: transparent;
         }
 
-        #input-group { transition: all 0.5s ease; }
-        input {
-            width: 100%; box-sizing: border-box; margin: 12px 0; padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px; font-size: 15px; outline: none;
-        }
-        input:focus { background: rgba(255, 255, 255, 0.6); border-color: var(--primary-color); }
-        button {
-            width: 100%; margin-top: 25px; padding: 18px;
-            background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
-            color: white; border: none; border-radius: 18px; font-size: 17px; font-weight: 600;
-            cursor: pointer; box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
+        #input-group {
+            transition: all 0.5s ease;
         }
 
-        .fade-out { opacity: 0; transform: scale(0.9); filter: blur(10px); pointer-events: none; }
-        
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 12px 0;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 18px;
+            background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.9);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
         #loader-wrapper {
-            display: none; flex-direction: column; align-items: center; justify-content: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             animation: fadeIn 0.6s ease forwards;
         }
+
         .spinner {
-            width: 50px; height: 50px; border: 3px solid rgba(0, 122, 255, 0.1);
-            border-top: 3px solid var(--primary-color); border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 122, 255, 0.1);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
         /* 💡 全屏容器 */
-        #coze-container { display: none; width: 100vw; height: 100vh; background: #fff; }
+        #coze-container {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background: #fff;
+        }
+
+        /* 彻底隐藏所有功能性图标按钮（关闭、新建、侧边栏等） */
+        /* 这里的选择器覆盖了你提供的 efa8c 和 e4f8c 等动态类名 */
+        div[class*="efa8c"],
+        div[class*="e4f8c"],
+        button[class*="icon-btn"],
+        [aria-label*="close"],
+        [aria-label*="关闭"],
+        [aria-label*="new chat"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* 补救：防止误伤“发送”图标 */
+        /* 通常发送按钮会有特定的类名或颜色，强制让它回来 */
+        button[class*="primary"] {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="login-card" id="login-box">
@@ -105,7 +184,7 @@
         const BOT_ID = "7629244922654851135";
 
         // 💡 防误关守护：当学生试图关闭网页时弹出提醒
-        window.onbeforeunload = function() {
+        window.onbeforeunload = function () {
             return "实验正在进行中，关闭网页将导致进度丢失，确定退出吗？";
         };
 
@@ -128,7 +207,7 @@
                 loaderWrapper.style.display = 'flex';
             }, 400);
 
-            const uniqueUserId = `${cls}_${stu}_${ses}`; 
+            const uniqueUserId = `${cls}_${stu}_${ses}`;
 
             try {
                 const response = await fetch(API_URL, { method: 'POST' });
@@ -161,7 +240,7 @@
                             layout: 'pc',
                             width: '100%',
                             // 💡 核心锁定代码：隐藏页眉
-                            showHeader: false 
+                            showHeader: false
                         }
                     }
                 });
@@ -177,4 +256,5 @@
         }
     </script>
 </body>
+
 </html>
