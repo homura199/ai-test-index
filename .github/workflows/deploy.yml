@@ -17,10 +17,10 @@ jobs:
       - name: Configure COSCMD
         run: |
           coscmd config \
-          -a ${{ secrets.TENCENT_SECRET_ID }} \
-          -s ${{ secrets.TENCENT_SECRET_KEY }} \
-          -b ${{ secrets.TENCENT_COS_BUCKET }} \
-          -r ${{ secrets.TENCENT_COS_REGION }}
+          -a ${{ secrets.SECRET_ID }} \
+          -s ${{ secrets.SECRET_KEY }} \
+          -b ${{ secrets.COS_BUCKET }} \
+          -r ${{ secrets.COS_REGION }}
 
       - name: Upload Entire Folder to COS
         # -r 代表递归上传整个文件夹
