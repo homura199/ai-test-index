@@ -206,7 +206,7 @@
 
     <script>
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
-        const BOT_MAP = { "1": "7634222430592139327", "2": "7634222430592139327" };
+        const BOT_MAP = { "1": "7629244922654851135", "2": "7629244922654851135" };
 
         async function startChat() {
             const cls = document.getElementById('className').value;
@@ -255,7 +255,7 @@
                         config: {
                             bot_id: BOT_MAP[ses],
                             // 💡 强制指定房间号为 safeId。只要它变了，对话必然隔离！
-                            
+                            conversation_id: safeId
                         },
                         auth: {
                             type: 'token',
