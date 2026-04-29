@@ -52,6 +52,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -278,7 +279,6 @@
 
             try {
                 // 获取 Token 并发送 ID 供后端隔离
-                // 修改 startChat 里的 fetch 部分
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
@@ -289,7 +289,9 @@
                     })
                 });
                 const result = await response.json();
-                const dynamicToken = result.data.token;
+                
+                // 💡 核心修复：统一使用 finalToken 这个变量名
+                const finalToken = result.data.token;
 
                 document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
                 await new Promise(r => setTimeout(r, 600));
@@ -308,7 +310,7 @@
                         config: { bot_id: currentBotId },
                         auth: {
                             type: 'token',
-                            token: finalToken, // 这里现在拿到的是 czs_ 开头的正规军 Token
+                            token: finalToken, // 💡 这里完美引用了上方的 finalToken
                             onRefreshToken: function () {
                                 return finalToken;
                             }
@@ -341,6 +343,7 @@
                 }, 600);
 
             } catch (error) {
+                console.error(error);
                 alert("连接失败，请检查网络后重试！");
                 inputGroup.style.display = 'block';
                 inputGroup.classList.remove('fade-out');
