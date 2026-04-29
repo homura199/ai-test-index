@@ -22,11 +22,7 @@
             justify-content: center;
             align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
-            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%), radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%), radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
             background-attachment: fixed;
             overflow: hidden;
         }
@@ -52,7 +48,6 @@
             font-weight: 700;
             background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -109,12 +104,6 @@
             transition: all 0.3s ease;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        /* 动画控制 */
         .fade-out {
             opacity: 0;
             transform: scale(0.9);
@@ -188,167 +177,83 @@
 </head>
 
 <body>
-
     <div class="login-card" id="login-box">
         <div id="input-group">
             <h3>实验教学平台</h3>
-
             <span class="label-text">所在班级</span>
             <select id="className">
                 <option value="" disabled selected>选择班级</option>
                 <option value="1班">1班</option>
                 <option value="2班">2班</option>
                 <option value="3班">3班</option>
-                <option value="4班">4班</option>
-                <option value="5班">5班</option>
-                <option value="6班">6班</option>
-                <option value="7班">7班</option>
-                <option value="8班">8班</option>
-                <option value="9班">9班</option>
-                <option value="10班">10班</option>
             </select>
-
             <span class="label-text">填写学号 (1-99)</span>
-            <input type="number" id="studentId" min="1" max="99" placeholder="请输入你的学号">
-
+            <input type="number" id="studentId" min="1" max="99" placeholder="请输入学号">
             <span class="label-text">实验课次</span>
             <select id="sessionNum">
                 <option value="" disabled selected>选择课次</option>
                 <option value="1">第 1 课次</option>
                 <option value="2">第 2 课次</option>
-                <option value="3">第 3 课次</option>
-                <option value="4">第 4 课次</option>
-                <option value="5">第 5 课次</option>
-                <option value="6">第 6 课次</option>
-                <option value="7">第 7 课次</option>
-                <option value="8">第 8 课次</option>
-                <option value="9">第 9 课次</option>
-                <option value="10">第 10 课次</option>
             </select>
-
             <button onclick="startChat()">开始实验</button>
         </div>
-
         <div id="loader-wrapper">
             <div class="spinner"></div>
             <p id="loading-text" style="margin-top:20px; color:rgba(0,0,0,0.5); font-size:14px;">环境初始化中...</p>
         </div>
     </div>
-
     <div id="coze-container"></div>
 
     <script>
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
-
-        // 💡 记得在这里填入你 10 个课次对应的真实 BOT_ID
-        const BOT_MAP = {
-            "1": "7629244922654851135",
-            "2": "7629244922654851135",
-            "3": "7629244922654851135",
-            "4": "7629244922654851135",
-            "5": "7629244922654851135",
-            "6": "7629244922654851135",
-            "7": "7629244922654851135",
-            "8": "7629244922654851135",
-            "9": "7629244922654851135",
-            "10": "7629244922654851135"
-        };
-
-        window.onbeforeunload = function () { return "实验正在进行，离开将丢失当前进度。"; };
+        const BOT_MAP = { "1": "7429244922654851135", "2": "7429244922654851135" };
 
         async function startChat() {
             const cls = document.getElementById('className').value;
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value;
+            if (!cls || !stu || !ses) { alert("请完善信息！"); return; }
 
-            // 基础校验：确保所有项都已选择或填写
-            if (!cls) { alert("请先选择你的班级！"); return; }
-            if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
-            if (!ses) { alert("请选择当前的实验课次！"); return; }
+            // 💡 物理清理旧缓存，确保不同学生在同一台设备不串台
+            localStorage.clear();
+            sessionStorage.clear();
 
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
             inputGroup.classList.add('fade-out');
-
-            setTimeout(() => {
-                inputGroup.style.display = 'none';
-                loaderWrapper.style.display = 'flex';
-            }, 400);
-
-            const currentBotId = BOT_MAP[ses];
+            setTimeout(() => { inputGroup.style.display = 'none'; loaderWrapper.style.display = 'flex'; }, 400);
 
             try {
-                // 获取 Token 并发送 ID 供后端隔离
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json' // 💡 必须告诉后端：这是 JSON！
-                    },
-                    body: JSON.stringify({
-                        user_id: `${cls}_${stu}_${ses}` // 💡 确保这里拼对了
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: `${cls}_${stu}_${ses}` })
                 });
                 const result = await response.json();
-                
-                // 💡 核心修复：统一使用 finalToken 这个变量名
-                const finalToken = result.data.token;
+                const finalToken = result.data.token; // 💡 统一变量名
 
-                document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
+                document.getElementById('loading-text').innerText = "验证成功，正在连接...";
                 await new Promise(r => setTimeout(r, 600));
 
-                const loginBox = document.getElementById('login-box');
-                loginBox.classList.add('card-exit');
-
+                document.getElementById('login-box').classList.add('card-exit');
                 setTimeout(() => {
-                    loginBox.style.display = 'none';
+                    document.getElementById('login-box').style.display = 'none';
                     const container = document.getElementById('coze-container');
-                    container.style.display = 'block';
-                    container.offsetHeight;
                     container.classList.add('show-time');
 
                     const chatClient = new window.CozeWebSDK.WebChatClient({
-                        config: { bot_id: currentBotId },
+                        config: { bot_id: BOT_MAP[ses] },
                         auth: {
                             type: 'token',
-                            token: finalToken, // 💡 这里完美引用了上方的 finalToken
-                            onRefreshToken: function () {
-                                return finalToken;
-                            }
+                            token: finalToken,
+                            onRefreshToken: () => finalToken
                         },
                         userInfo: { id: `${cls}_${stu}_${ses}`, nickname: `学生${stu}` },
-                        ui: {
-                            asstBtn: { isNeed: false },
-                            chatBot: {
-                                el: container,
-                                layout: 'pc',
-                                width: '100%',
-                                showHeader: false
-                            }
-                        }
+                        ui: { chatBot: { el: container, layout: 'pc', width: '100%', showHeader: false } }
                     });
-
                     chatClient.showChatBot();
-
-                    // 持续清理非必要按钮
-                    setInterval(() => {
-                        const svgs = document.querySelectorAll('svg');
-                        svgs.forEach(svg => {
-                            if (svg.innerHTML.includes('M4.96977') || svg.innerHTML.includes('M13.4997')) {
-                                const target = svg.closest('button') || svg.closest('div');
-                                if (target) target.remove();
-                            }
-                        });
-                    }, 500);
-
                 }, 600);
-
-            } catch (error) {
-                console.error(error);
-                alert("连接失败，请检查网络后重试！");
-                inputGroup.style.display = 'block';
-                inputGroup.classList.remove('fade-out');
-                loaderWrapper.style.display = 'none';
-            }
+            } catch (e) { alert("连接失败！"); location.reload(); }
         }
     </script>
 </body>
