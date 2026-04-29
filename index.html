@@ -241,33 +241,33 @@
                     const container = document.getElementById('coze-container');
                     container.classList.add('show-time');
 
-const chatClient = new window.CozeWebSDK.WebChatClient({
-    config: {
-        bot_id: BOT_MAP[ses],
-        // 💡 重点在这里！必须确保这个 ID 是动态的
-        // 只要它是根据学号生成的 safeId，Coze 就没法把学生串在一起
-        conversation_id: safeId 
-    },
-    auth: {
-        type: 'token',
-        token: finalToken,
-        onRefreshToken: () => finalToken
-    },
-    // 💡 加上这行，让服务端也记录这个唯一标识
-    userInfo: { 
-        id: safeId, 
-        nickname: `学生${stu}` 
-    },
-    ui: {
-        chatBot: {
-            el: container,
-            layout: 'pc',
-            width: '100%',
-            // 💡 建议把这个关掉，防止 SDK 自动去加载历史记录
-            history: false 
-        }
-    }
-});
+                    const chatClient = new window.CozeWebSDK.WebChatClient({
+                        config: {
+                            bot_id: BOT_MAP[ses],
+                            // 💡 重点在这里！必须确保这个 ID 是动态的
+                            // 只要它是根据学号生成的 safeId，Coze 就没法把学生串在一起
+                            conversation_id: safeId
+                        },
+                        auth: {
+                            type: 'token',
+                            token: finalToken,
+                            onRefreshToken: () => finalToken
+                        },
+                        // 💡 加上这行，让服务端也记录这个唯一标识
+                        userInfo: {
+                            id: safeId,
+                            nickname: `学生${stu}`
+                        },
+                        ui: {
+                            chatBot: {
+                                el: container,
+                                layout: 'pc',
+                                width: '100%',
+                                // 💡 建议把这个关掉，防止 SDK 自动去加载历史记录
+                                history: false
+                            }
+                        }
+                    });
                     chatClient.showChatBot();
                 }, 600);
             } catch (e) { alert("连接失败！"); location.reload(); }
