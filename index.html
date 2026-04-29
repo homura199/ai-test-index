@@ -224,28 +224,35 @@
             setTimeout(() => { inputGroup.style.display = 'none'; loaderWrapper.style.display = 'flex'; }, 400);
 
             try {
+                // 1. 请求后端获取令牌和加密后的 ID
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: `${cls}_${stu}_${ses}` })
                 });
+
                 const result = await response.json();
-                const finalToken = result.data.token; // 💡 统一变量名
+
+                // 💡 核心修复：这里必须定义 safeId，名字要和后面初始化 SDK 时用的一模一样
+                const finalToken = result.data.token;
+                const safeId = result.data.user_id_hash; // 从后端拿到的 MD5 字符串
 
                 document.getElementById('loading-text').innerText = "验证成功，正在连接...";
                 await new Promise(r => setTimeout(r, 600));
 
+                // 2. 动画切换
                 document.getElementById('login-box').classList.add('card-exit');
+
                 setTimeout(() => {
                     document.getElementById('login-box').style.display = 'none';
                     const container = document.getElementById('coze-container');
                     container.classList.add('show-time');
 
+                    // 3. 初始化 SDK
                     const chatClient = new window.CozeWebSDK.WebChatClient({
                         config: {
                             bot_id: BOT_MAP[ses],
-                            // 💡 重点在这里！必须确保这个 ID 是动态的
-                            // 只要它是根据学号生成的 safeId，Coze 就没法把学生串在一起
+                            // 💡 既然定义了 safeId，这里引用它，Coze 就会强制开辟独立房间
                             conversation_id: safeId
                         },
                         auth: {
@@ -253,24 +260,15 @@
                             token: finalToken,
                             onRefreshToken: () => finalToken
                         },
-                        // 💡 加上这行，让服务端也记录这个唯一标识
-                        userInfo: {
-                            id: safeId,
-                            nickname: `学生${stu}`
-                        },
-                        ui: {
-                            chatBot: {
-                                el: container,
-                                layout: 'pc',
-                                width: '100%',
-                                // 💡 建议把这个关掉，防止 SDK 自动去加载历史记录
-                                history: false
-                            }
-                        }
+                        userInfo: { id: safeId, nickname: `学生${stu}` },
+                        ui: { chatBot: { el: container, layout: 'pc', width: '100%', showHeader: false } }
                     });
                     chatClient.showChatBot();
                 }, 600);
-            } catch (e) { alert("连接失败！"); location.reload(); }
+            } catch (e) {
+                console.error("初始化报错了：", e);
+                alert("连接失败，请检查网络！");
+            }
         }
     </script>
 </body>
