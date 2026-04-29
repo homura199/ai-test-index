@@ -208,79 +208,79 @@
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
         const BOT_MAP = { "1": "7629244922654851135", "2": "7629244922654851135" };
 
- async function startChat() {
-    const cls = document.getElementById('className').value;
-    const stu = document.getElementById('studentId').value.trim();
-    const ses = document.getElementById('sessionNum').value;
-    const fullId = `${cls}_${stu}_${ses}`;
+        async function startChat() {
+            const cls = document.getElementById('className').value;
+            const stu = document.getElementById('studentId').value.trim();
+            const ses = document.getElementById('sessionNum').value;
+            const fullId = `${cls}_${stu}_${ses}`;
 
-    // 1. 暴力清理旧缓存（防止 SDK 记忆之前的对话）
-    localStorage.clear();
-    sessionStorage.clear();
-    if (window.indexedDB) {
-        window.indexedDB.deleteDatabase('coze_sdk_db');
-        window.indexedDB.deleteDatabase('coze-chat-sdk');
-    }
+            // 1. 暴力清理旧缓存（防止 SDK 记忆之前的对话）
+            localStorage.clear();
+            sessionStorage.clear();
+            if (window.indexedDB) {
+                window.indexedDB.deleteDatabase('coze_sdk_db');
+                window.indexedDB.deleteDatabase('coze-chat-sdk');
+            }
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: fullId })
-        });
-        
-        const result = await response.json();
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: fullId })
+                });
 
-        // --- 💡 核心修复：定义变量 ---
-        const finalToken = result.data.token;
-        const safeId = result.data.user_id_hash; // 从后端拿回 MD5 字符串
-        
-        if (!safeId) {
-            console.error("后端没传回加密ID！");
-            return;
-        }
-        // --------------------------
+                const result = await response.json();
 
-        document.getElementById('loading-text').innerText = "验证成功，正在连接...";
-        document.getElementById('login-box').classList.add('card-exit');
+                // --- 💡 核心修复：定义变量 ---
+                const finalToken = result.data.token;
+                const safeId = result.data.user_id_hash; // 从后端拿回 MD5 字符串
 
-        setTimeout(() => {
-            document.getElementById('login-box').style.display = 'none';
-            const container = document.getElementById('coze-container');
-            container.style.display = 'block';
-            container.classList.add('show-time');
-
-            // 2. 初始化 SDK
-            const chatClient = new window.CozeWebSDK.WebChatClient({
-                config: { 
-                    bot_id: BOT_MAP[ses],
-                    // 💡 强制指定房间号为 safeId。只要它变了，对话必然隔离！
-                    conversation_id: safeId 
-                },
-                auth: {
-                    type: 'token',
-                    token: finalToken,
-                    onRefreshToken: () => finalToken
-                },
-                // 这里的 id 也要和 safeId 保持一致
-                userInfo: { id: safeId, nickname: `学生${stu}` },
-                ui: { 
-                    chatBot: { 
-                        el: container, 
-                        layout: 'pc', 
-                        width: '100%', 
-                        showHeader: false 
-                    } 
+                if (!safeId) {
+                    console.error("后端没传回加密ID！");
+                    return;
                 }
-            });
-            chatClient.showChatBot();
-        }, 600);
+                // --------------------------
 
-    } catch (error) {
-        console.error(error);
-        alert("环境加载失败，请刷新页面重试！");
-    }
-}
+                document.getElementById('loading-text').innerText = "验证成功，正在连接...";
+                document.getElementById('login-box').classList.add('card-exit');
+
+                setTimeout(() => {
+                    document.getElementById('login-box').style.display = 'none';
+                    const container = document.getElementById('coze-container');
+                    container.style.display = 'block';
+                    container.classList.add('show-time');
+
+                    // 2. 初始化 SDK
+                    const chatClient = new window.CozeWebSDK.WebChatClient({
+                        config: {
+                            bot_id: BOT_MAP[ses],
+                            // 💡 强制指定房间号为 safeId。只要它变了，对话必然隔离！
+                            
+                        },
+                        auth: {
+                            type: 'token',
+                            token: finalToken,
+                            onRefreshToken: () => finalToken
+                        },
+                        // 这里的 id 也要和 safeId 保持一致
+                        userInfo: { id: safeId, nickname: `学生${stu}` },
+                        ui: {
+                            chatBot: {
+                                el: container,
+                                layout: 'pc',
+                                width: '100%',
+                                showHeader: false
+                            }
+                        }
+                    });
+                    chatClient.showChatBot();
+                }, 600);
+
+            } catch (error) {
+                console.error(error);
+                alert("环境加载失败，请刷新页面重试！");
+            }
+        }
     </script>
 </body>
 
