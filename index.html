@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,240 +13,158 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
-            /* 背景渐变效果 */
             background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
-            background-attachment: fixed;
-            overflow: hidden;
+                        radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                        radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            background-attachment: fixed; overflow: hidden;
         }
 
-        /* 登录卡片样式 */
         .login-card {
-            position: relative;
-            width: 360px;
-            padding: 50px 40px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(40px) saturate(180%);
+            position: relative; width: 360px; padding: 40px;
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
+            border: 1px solid var(--glass-border); border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(255, 255, 255, 0.3) inset;
-            text-align: center;
-            transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            text-align: center; transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
             z-index: 10;
         }
 
-        /* 输入框淡出效果 */
-        .fade-out {
-            opacity: 0;
-            transform: scale(0.9);
-            filter: blur(10px);
-            pointer-events: none;
-        }
+        .login-card h3 { margin: 0 0 30px 0; font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* 卡片退出动画 */
-        .card-exit {
-            opacity: 0 !important;
-            transform: scale(0.9) translateY(-40px) !important;
-            filter: blur(20px) !important;
-        }
+        .label-text { display: block; text-align: left; font-size: 13px; color: rgba(0,0,0,0.6); margin: 15px 0 5px 5px; font-weight: 600; }
 
-        .login-card h3 {
-            margin: 0 0 35px 0;
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.8px;
-            background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        select, input {
+            width: 100%; box-sizing: border-box; padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px; font-size: 15px; outline: none; transition: all 0.3s ease;
+            appearance: none; color: #1d1d1f;
         }
+        select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+        input:focus, select:focus { background: rgba(255, 255, 255, 0.6); border-color: var(--primary-color); }
 
-        #input-group {
-            transition: all 0.5s ease;
-        }
+        button { width: 100%; margin-top: 30px; padding: 16px; background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3); transition: all 0.3s ease; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        input {
-            width: 100%;
-            box-sizing: border-box;
-            margin: 12px 0;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-        }
-
-        button {
-            width: 100%;
-            margin-top: 25px;
-            padding: 18px;
-            background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
-            color: white;
-            border: none;
-            border-radius: 18px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        /* 加载动画 */
-        #loader-wrapper {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.6s ease forwards;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 122, 255, 0.1);
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(1.1);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* 聊天容器 */
-        #coze-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #fff;
-            z-index: 9999;
-            opacity: 0;
-            transform: translateY(40px) scale(0.98);
-            filter: blur(10px);
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        #coze-container.show-time {
-            display: block !important;
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0);
-        }
-
-        /* 屏蔽右上角区域 */
-        #top-shield {
-            display: none;
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 150px;
-            height: 60px;
-            background: transparent;
-            z-index: 10000;
-            cursor: default;
-        }
-
-        /* 隐藏多余按钮 */
-        div[class*="efa8c"],
-        div[class*="e4f8c"] {
-            display: none !important;
-        }
+        /* 动画控制 */
+        .fade-out { opacity: 0; transform: scale(0.9); filter: blur(10px); pointer-events: none; }
+        .card-exit { opacity: 0 !important; transform: scale(0.9) translateY(-40px) !important; filter: blur(20px) !important; }
+        #coze-container { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 9999; opacity: 0; transform: translateY(40px) scale(0.98); filter: blur(10px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        #coze-container.show-time { display: block !important; opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        
+        #loader-wrapper { display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.6s ease forwards; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(0, 122, 255, 0.1); border-top: 3px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
-
 <body>
 
     <div class="login-card" id="login-box">
         <div id="input-group">
-            <h3>实验数据录入</h3>
-            <input type="text" id="className" placeholder="请输入班级 (例: 计科1班)">
-            <input type="text" id="studentId" placeholder="请输入学号 (例: 2024001)">
-            <input type="text" id="sessionNum" placeholder="请输入课次 (例: 1)">
-            <button onclick="startChat()">进入智能体</button>
+            <h3>实验教学平台</h3>
+            
+            <span class="label-text">所在班级</span>
+            <select id="className">
+                <option value="" disabled selected>选择班级</option>
+                <option value="1班">1班</option>
+                <option value="2班">2班</option>
+                <option value="3班">3班</option>
+                <option value="4班">4班</option>
+                <option value="5班">5班</option>
+                <option value="6班">6班</option>
+                <option value="7班">7班</option>
+                <option value="8班">8班</option>
+                <option value="9班">9班</option>
+                <option value="10班">10班</option>
+            </select>
+
+            <span class="label-text">填写学号 (1-99)</span>
+            <input type="number" id="studentId" min="1" max="99" placeholder="请输入你的学号">
+
+            <span class="label-text">实验课次</span>
+            <select id="sessionNum">
+                <option value="" disabled selected>选择课次</option>
+                <option value="1">第 1 课次</option>
+                <option value="2">第 2 课次</option>
+                <option value="3">第 3 课次</option>
+                <option value="4">第 4 课次</option>
+                <option value="5">第 5 课次</option>
+                <option value="6">第 6 课次</option>
+                <option value="7">第 7 课次</option>
+                <option value="8">第 8 课次</option>
+                <option value="9">第 9 课次</option>
+                <option value="10">第 10 课次</option>
+            </select>
+
+            <button onclick="startChat()">开始实验</button>
         </div>
+
         <div id="loader-wrapper">
             <div class="spinner"></div>
-            <p id="loading-text" style="margin-top:20px; color:rgba(0,0,0,0.5); font-weight:500;">正在建立安全连接...</p>
+            <p id="loading-text" style="margin-top:20px; color:rgba(0,0,0,0.5); font-size:14px;">环境初始化中...</p>
         </div>
     </div>
 
     <div id="coze-container"></div>
-    <div id="top-shield"></div>
 
     <script>
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
-        const BOT_ID = "7629244922654851135";
+        
+        // 💡 记得在这里填入你 10 个课次对应的真实 BOT_ID
+        const BOT_MAP = {
+            "1": "7429244922654851135", 
+            "2": "此处填写第2课ID",
+            "3": "此处填写第3课ID",
+            "4": "此处填写第4课ID",
+            "5": "此处填写第5课ID",
+            "6": "此处填写第6课ID",
+            "7": "此处填写第7课ID",
+            "8": "此处填写第8课ID",
+            "9": "此处填写第9课ID",
+            "10": "此处填写第10课ID"
+        };
 
-        window.onbeforeunload = function () { return "实验正在进行，确定离开吗？"; };
+        window.onbeforeunload = function() { return "实验正在进行，离开将丢失当前进度。"; };
 
         async function startChat() {
-            const cls = document.getElementById('className').value.trim();
+            const cls = document.getElementById('className').value;
             const stu = document.getElementById('studentId').value.trim();
-            const ses = document.getElementById('sessionNum').value.trim();
-            if (!cls || !stu || !ses) { alert("请填写完整信息！"); return; }
+            const ses = document.getElementById('sessionNum').value;
 
-            // 淡出输入框
+            // 基础校验：确保所有项都已选择或填写
+            if (!cls) { alert("请先选择你的班级！"); return; }
+            if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
+            if (!ses) { alert("请选择当前的实验课次！"); return; }
+
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
             inputGroup.classList.add('fade-out');
-
+            
             setTimeout(() => {
                 inputGroup.style.display = 'none';
                 loaderWrapper.style.display = 'flex';
             }, 400);
 
+            const currentBotId = BOT_MAP[ses];
+
             try {
-                // 获取令牌
-                const response = await fetch(API_URL, { method: 'POST' });
+                // 获取 Token 并发送 ID 供后端隔离
+                const response = await fetch(API_URL, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: `${cls}_${stu}_${ses}` }) 
+                });
                 const result = await response.json();
-                if (!result.data || !result.data.token) throw new Error("Token Missing");
                 const dynamicToken = result.data.token;
 
-                document.getElementById('loading-text').innerText = "身份验证成功，正在进入...";
-                await new Promise(r => setTimeout(r, 800));
+                document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
+                await new Promise(r => setTimeout(r, 600));
 
-                // 退出卡片
                 const loginBox = document.getElementById('login-box');
                 loginBox.classList.add('card-exit');
 
@@ -255,15 +172,11 @@
                     loginBox.style.display = 'none';
                     const container = document.getElementById('coze-container');
                     container.style.display = 'block';
-                    container.offsetHeight; // 强制重绘
-
-                    // 显示聊天窗口
+                    container.offsetHeight; 
                     container.classList.add('show-time');
-                    document.getElementById('top-shield').style.display = 'block';
 
-                    // 初始化聊天客户端
                     const chatClient = new window.CozeWebSDK.WebChatClient({
-                        config: { bot_id: BOT_ID },
+                        config: { bot_id: currentBotId },
                         auth: {
                             type: 'token',
                             token: dynamicToken,
@@ -273,7 +186,7 @@
                                 return resJson.data.token;
                             }
                         },
-                        userInfo: { id: `${cls}_${stu}_${ses}`, nickname: stu },
+                        userInfo: { id: `${cls}_${stu}_${ses}`, nickname: `学生${stu}` },
                         ui: {
                             asstBtn: { isNeed: false },
                             chatBot: {
@@ -287,7 +200,7 @@
 
                     chatClient.showChatBot();
 
-                    // 清理按钮
+                    // 持续清理非必要按钮
                     setInterval(() => {
                         const svgs = document.querySelectorAll('svg');
                         svgs.forEach(svg => {
@@ -301,8 +214,7 @@
                 }, 600);
 
             } catch (error) {
-                console.error(error);
-                alert("加载失败，请刷新页面重试！");
+                alert("连接失败，请检查网络后重试！");
                 inputGroup.style.display = 'block';
                 inputGroup.classList.remove('fade-out');
                 loaderWrapper.style.display = 'none';
@@ -310,5 +222,4 @@
         }
     </script>
 </body>
-
 </html>
