@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,61 +14,184 @@
         }
 
         body {
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
-            display: flex; justify-content: center; align-items: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
             background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
-                        radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
-                        radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
-            background-attachment: fixed; overflow: hidden;
+                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            overflow: hidden;
         }
 
         .login-card {
-            position: relative; width: 360px; padding: 40px;
-            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(180%);
+            position: relative;
+            width: 360px;
+            padding: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid var(--glass-border); border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(255, 255, 255, 0.3) inset;
-            text-align: center; transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            text-align: center;
+            transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
             z-index: 10;
         }
 
-        .login-card h3 { margin: 0 0 30px 0; font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        .label-text { display: block; text-align: left; font-size: 13px; color: rgba(0,0,0,0.6); margin: 15px 0 5px 5px; font-weight: 600; }
-
-        select, input {
-            width: 100%; box-sizing: border-box; padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 14px; font-size: 15px; outline: none; transition: all 0.3s ease;
-            appearance: none; color: #1d1d1f;
+        .login-card h3 {
+            margin: 0 0 30px 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
-        input:focus, select:focus { background: rgba(255, 255, 255, 0.6); border-color: var(--primary-color); }
 
-        button { width: 100%; margin-top: 30px; padding: 16px; background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3); transition: all 0.3s ease; }
-        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .label-text {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.6);
+            margin: 15px 0 5px 5px;
+            font-weight: 600;
+        }
+
+        select,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            appearance: none;
+            color: #1d1d1f;
+        }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        input:focus,
+        select:focus {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
 
         /* 动画控制 */
-        .fade-out { opacity: 0; transform: scale(0.9); filter: blur(10px); pointer-events: none; }
-        .card-exit { opacity: 0 !important; transform: scale(0.9) translateY(-40px) !important; filter: blur(20px) !important; }
-        #coze-container { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 9999; opacity: 0; transform: translateY(40px) scale(0.98); filter: blur(10px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
-        #coze-container.show-time { display: block !important; opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-        
-        #loader-wrapper { display: none; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.6s ease forwards; }
-        .spinner { width: 40px; height: 40px; border: 3px solid rgba(0, 122, 255, 0.1); border-top: 3px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.9);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .card-exit {
+            opacity: 0 !important;
+            transform: scale(0.9) translateY(-40px) !important;
+            filter: blur(20px) !important;
+        }
+
+        #coze-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #fff;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            filter: blur(10px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #coze-container.show-time {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+
+        #loader-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 122, 255, 0.1);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="login-card" id="login-box">
         <div id="input-group">
             <h3>实验教学平台</h3>
-            
+
             <span class="label-text">所在班级</span>
             <select id="className">
                 <option value="" disabled selected>选择班级</option>
@@ -114,12 +238,12 @@
 
     <script>
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
-        
+
         // 💡 记得在这里填入你 10 个课次对应的真实 BOT_ID
         const BOT_MAP = {
-            "1": "7631227107964305446", 
+            "1": "7429244922654851135",
             "2": "7429244922654851135",
-            "3": "7631221332725727247",
+            "3": "7429244922654851135",
             "4": "7429244922654851135",
             "5": "7429244922654851135",
             "6": "7429244922654851135",
@@ -129,7 +253,7 @@
             "10": "7429244922654851135"
         };
 
-        window.onbeforeunload = function() { return "实验正在进行，离开将丢失当前进度。"; };
+        window.onbeforeunload = function () { return "实验正在进行，离开将丢失当前进度。"; };
 
         async function startChat() {
             const cls = document.getElementById('className').value;
@@ -144,7 +268,7 @@
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
             inputGroup.classList.add('fade-out');
-            
+
             setTimeout(() => {
                 inputGroup.style.display = 'none';
                 loaderWrapper.style.display = 'flex';
@@ -154,10 +278,15 @@
 
             try {
                 // 获取 Token 并发送 ID 供后端隔离
-                const response = await fetch(API_URL, { 
+                // 修改 startChat 里的 fetch 部分
+                const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: `${cls}_${stu}_${ses}` }) 
+                    headers: {
+                        'Content-Type': 'application/json' // 💡 必须告诉后端：这是 JSON！
+                    },
+                    body: JSON.stringify({
+                        user_id: `${cls}_${stu}_${ses}` // 💡 确保这里拼对了
+                    })
                 });
                 const result = await response.json();
                 const dynamicToken = result.data.token;
@@ -172,7 +301,7 @@
                     loginBox.style.display = 'none';
                     const container = document.getElementById('coze-container');
                     container.style.display = 'block';
-                    container.offsetHeight; 
+                    container.offsetHeight;
                     container.classList.add('show-time');
 
                     const chatClient = new window.CozeWebSDK.WebChatClient({
@@ -222,4 +351,5 @@
         }
     </script>
 </body>
+
 </html>
