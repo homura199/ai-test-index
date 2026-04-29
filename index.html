@@ -7,6 +7,7 @@
     <title>AI 智能实验教学平台</title>
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
     <style>
+        /* --- 恢复你的精美样式 --- */
         :root {
             --glass-bg: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.3);
@@ -22,7 +23,11 @@
             justify-content: center;
             align-items: center;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
-            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%), radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%), radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
             background-attachment: fixed;
             overflow: hidden;
         }
@@ -75,20 +80,6 @@
             color: #1d1d1f;
         }
 
-        select {
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-        }
-
-        input:focus,
-        select:focus {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: var(--primary-color);
-        }
-
         button {
             width: 100%;
             margin-top: 30px;
@@ -104,6 +95,7 @@
             transition: all 0.3s ease;
         }
 
+        /* 动画控制 */
         .fade-out {
             opacity: 0;
             transform: scale(0.9);
@@ -144,7 +136,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.6s ease forwards;
         }
 
         .spinner {
@@ -161,18 +152,6 @@
                 transform: rotate(360deg);
             }
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(1.1);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
     </style>
 </head>
 
@@ -182,94 +161,86 @@
             <h3>实验教学平台</h3>
             <span class="label-text">所在班级</span>
             <select id="className">
-                <option value="" disabled selected>选择班级</option>
                 <option value="1班">1班</option>
                 <option value="2班">2班</option>
-                <option value="3班">3班</option>
             </select>
-            <span class="label-text">填写学号 (1-99)</span>
-            <input type="number" id="studentId" min="1" max="99" placeholder="请输入学号">
+            <span class="label-text">填写学号</span>
+            <input type="number" id="studentId" placeholder="请输入学号">
             <span class="label-text">实验课次</span>
             <select id="sessionNum">
-                <option value="" disabled selected>选择课次</option>
                 <option value="1">第 1 课次</option>
-                <option value="2">第 2 课次</option>
             </select>
             <button onclick="startChat()">开始实验</button>
         </div>
+
         <div id="loader-wrapper">
             <div class="spinner"></div>
             <p id="loading-text" style="margin-top:20px; color:rgba(0,0,0,0.5); font-size:14px;">环境初始化中...</p>
         </div>
     </div>
+
     <div id="coze-container"></div>
 
     <script>
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
-        const BOT_MAP = { "1": "7629244922654851135", "2": "7629244922654851135" };
+        const BOT_MAP = { "1": "7429244922654851135" };
 
         async function startChat() {
             const cls = document.getElementById('className').value;
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value;
-            const fullId = `${cls}_${stu}_${ses}`;
+            if (!cls || !stu || !ses) { alert("信息不完整"); return; }
 
-            // 1. 暴力清理旧缓存（防止 SDK 记忆之前的对话）
+            // 1. 物理清理缓存
             localStorage.clear();
             sessionStorage.clear();
-            if (window.indexedDB) {
-                window.indexedDB.deleteDatabase('coze_sdk_db');
-                window.indexedDB.deleteDatabase('coze-chat-sdk');
-            }
+
+            const inputGroup = document.getElementById('input-group');
+            const loaderWrapper = document.getElementById('loader-wrapper');
+            inputGroup.classList.add('fade-out');
+            setTimeout(() => { inputGroup.style.display = 'none'; loaderWrapper.style.display = 'flex'; }, 400);
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: fullId })
+                    body: JSON.stringify({ user_id: `${cls}_${stu}_${ses}` })
                 });
 
                 const result = await response.json();
-
-                // --- 💡 核心修复：定义变量 ---
                 const finalToken = result.data.token;
-                const safeId = result.data.user_id_hash; // 从后端拿回 MD5 字符串
+                const safeId = result.data.user_id_hash;
 
-                if (!safeId) {
-                    console.error("后端没传回加密ID！");
-                    return;
-                }
-                // --------------------------
-
-                document.getElementById('loading-text').innerText = "验证成功，正在连接...";
+                document.getElementById('loading-text').innerText = "验证成功，连接 AI 中...";
                 document.getElementById('login-box').classList.add('card-exit');
 
                 setTimeout(() => {
                     document.getElementById('login-box').style.display = 'none';
                     const container = document.getElementById('coze-container');
-                    container.style.display = 'block';
                     container.classList.add('show-time');
 
-                    // 2. 初始化 SDK
                     const chatClient = new window.CozeWebSDK.WebChatClient({
                         config: {
-                            bot_id: BOT_MAP[ses],
-                            // 💡 强制指定房间号为 safeId。只要它变了，对话必然隔离！
-                            conversation_id: safeId
+                            bot_id: BOT_MAP[ses]
+                            // 💡 官方建议：不要手动传 conversation_id，依靠 JWT 隔离
                         },
                         auth: {
                             type: 'token',
                             token: finalToken,
                             onRefreshToken: () => finalToken
                         },
-                        // 这里的 id 也要和 safeId 保持一致
                         userInfo: { id: safeId, nickname: `学生${stu}` },
                         ui: {
                             chatBot: {
                                 el: container,
                                 layout: 'pc',
                                 width: '100%',
-                                showHeader: false
+                                showHeader: false,
+                                // 💡 重点：默认开启语音输入模式
+                                voice: {
+                                    isNeed: true,
+                                    defaultVoice: true
+                                }
                             }
                         }
                     });
@@ -277,8 +248,8 @@
                 }, 600);
 
             } catch (error) {
-                console.error(error);
-                alert("环境加载失败，请刷新页面重试！");
+                alert("加载失败，请刷新重试");
+                location.reload();
             }
         }
     </script>
