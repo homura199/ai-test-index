@@ -80,12 +80,102 @@
             color: #1d1d1f;
         }
 
-        select {
+        /* 自定义下拉列表样式 */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .select-selected {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 15px;
+            color: #1d1d1f;
             cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease, box-shadow 0.3s ease;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 16px;
+            user-select: none;
+        }
+
+        .select-selected:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .select-selected.select-arrow-active {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='18 15 12 9 6 15'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .select-items {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border-radius: 14px;
+            margin-top: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 122, 255, 0.3) transparent;
+        }
+
+        .select-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .select-items::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .select-items::-webkit-scrollbar-thumb {
+            background: rgba(0, 122, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .select-items div {
+            padding: 12px 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            color: #1d1d1f;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .select-items div:last-child {
+            border-bottom: none;
+        }
+
+        .select-items div:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .select-items div.same-as-selected {
+            background: rgba(0, 122, 255, 0.15);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .select-hide {
+            display: none;
         }
 
         input:focus,
@@ -194,37 +284,43 @@
             <h3>实验教学平台</h3>
 
             <span class="label-text">所在班级</span>
-            <select id="className">
-                <option value="" disabled selected>选择班级</option>
-                <option value="1班">1班</option>
-                <option value="2班">2班</option>
-                <option value="3班">3班</option>
-                <option value="4班">4班</option>
-                <option value="5班">5班</option>
-                <option value="6班">6班</option>
-                <option value="7班">7班</option>
-                <option value="8班">8班</option>
-                <option value="9班">9班</option>
-                <option value="10班">10班</option>
-            </select>
+            <div class="custom-select" id="className-select">
+                <div class="select-selected">选择班级</div>
+                <div class="select-items select-hide">
+                    <div data-value="1班">1班</div>
+                    <div data-value="2班">2班</div>
+                    <div data-value="3班">3班</div>
+                    <div data-value="4班">4班</div>
+                    <div data-value="5班">5班</div>
+                    <div data-value="6班">6班</div>
+                    <div data-value="7班">7班</div>
+                    <div data-value="8班">8班</div>
+                    <div data-value="9班">9班</div>
+                    <div data-value="10班">10班</div>
+                </div>
+            </div>
+            <input type="hidden" id="className" value="">
 
             <span class="label-text">填写学号 (1-99)</span>
             <input type="number" id="studentId" min="1" max="99" placeholder="请输入你的学号">
 
             <span class="label-text">实验课次</span>
-            <select id="sessionNum">
-                <option value="" disabled selected>选择课次</option>
-                <option value="1">第 1 课次</option>
-                <option value="2">第 2 课次</option>
-                <option value="3">第 3 课次</option>
-                <option value="4">第 4 课次</option>
-                <option value="5">第 5 课次</option>
-                <option value="6">第 6 课次</option>
-                <option value="7">第 7 课次</option>
-                <option value="8">第 8 课次</option>
-                <option value="9">第 9 课次</option>
-                <option value="10">第 10 课次</option>
-            </select>
+            <div class="custom-select" id="sessionNum-select">
+                <div class="select-selected">选择课次</div>
+                <div class="select-items select-hide">
+                    <div data-value="1">第 1 课次</div>
+                    <div data-value="2">第 2 课次</div>
+                    <div data-value="3">第 3 课次</div>
+                    <div data-value="4">第 4 课次</div>
+                    <div data-value="5">第 5 课次</div>
+                    <div data-value="6">第 6 课次</div>
+                    <div data-value="7">第 7 课次</div>
+                    <div data-value="8">第 8 课次</div>
+                    <div data-value="9">第 9 课次</div>
+                    <div data-value="10">第 10 课次</div>
+                </div>
+            </div>
+            <input type="hidden" id="sessionNum" value="">
 
             <button onclick="startChat()">开始实验</button>
         </div>
@@ -255,6 +351,67 @@
         };
 
         window.onbeforeunload = function () { return "实验正在进行，离开将丢失当前进度。"; };
+
+        // 自定义下拉列表功能
+        function initCustomSelects() {
+            const customSelects = document.querySelectorAll('.custom-select');
+
+            customSelects.forEach(function(select) {
+                const selected = select.querySelector('.select-selected');
+                const items = select.querySelector('.select-items');
+                const hiddenInput = select.nextElementSibling;
+
+                selected.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    closeAllSelect(this);
+                    this.classList.toggle('select-arrow-active');
+                    items.classList.toggle('select-hide');
+                });
+
+                items.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'DIV') {
+                        const value = e.target.getAttribute('data-value');
+                        const text = e.target.textContent;
+
+                        selected.textContent = text;
+                        hiddenInput.value = value;
+
+                        // 更新选中状态
+                        const allItems = items.querySelectorAll('div');
+                        allItems.forEach(item => item.classList.remove('same-as-selected'));
+                        e.target.classList.add('same-as-selected');
+
+                        selected.classList.remove('select-arrow-active');
+                        items.classList.add('select-hide');
+                    }
+                });
+            });
+
+            function closeAllSelect(elmnt) {
+                const items = document.querySelectorAll('.select-items');
+                const selected = document.querySelectorAll('.select-selected');
+                const arrNo = [];
+
+                selected.forEach(function(sel, index) {
+                    if (elmnt === sel) {
+                        arrNo.push(index);
+                    } else {
+                        sel.classList.remove('select-arrow-active');
+                    }
+                });
+
+                items.forEach(function(item, index) {
+                    if (arrNo.indexOf(index) === -1) {
+                        item.classList.add('select-hide');
+                    }
+                });
+            }
+
+            document.addEventListener('click', closeAllSelect);
+        }
+
+        // 页面加载完成后初始化自定义下拉
+        document.addEventListener('DOMContentLoaded', initCustomSelects);
 
         async function startChat() {
             const cls = document.getElementById('className').value;
