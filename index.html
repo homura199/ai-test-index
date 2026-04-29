@@ -308,11 +308,9 @@
                         config: { bot_id: currentBotId },
                         auth: {
                             type: 'token',
-                            token: dynamicToken,
-                            onRefreshToken: async () => {
-                                const res = await fetch(API_URL, { method: 'POST' });
-                                const resJson = await res.json();
-                                return resJson.data.token;
+                            token: finalToken, // 这里现在拿到的是 czs_ 开头的正规军 Token
+                            onRefreshToken: function () {
+                                return finalToken;
                             }
                         },
                         userInfo: { id: `${cls}_${stu}_${ses}`, nickname: `学生${stu}` },
