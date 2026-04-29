@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 智能实验教学平台</title>
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.3/libs/cn/index.js"></script>
-    <style>
-        /* --- 恢复你的精美样式 --- */
+ <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.3);
@@ -80,6 +79,20 @@
             color: #1d1d1f;
         }
 
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        input:focus,
+        select:focus {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+        }
+
         button {
             width: 100%;
             margin-top: 30px;
@@ -93,6 +106,11 @@
             cursor: pointer;
             box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
             transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
 
         /* 动画控制 */
@@ -136,6 +154,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.6s ease forwards;
         }
 
         .spinner {
@@ -150,6 +169,18 @@
         @keyframes spin {
             100% {
                 transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
             }
         }
     </style>
