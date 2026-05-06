@@ -356,19 +356,19 @@
         function initCustomSelects() {
             const customSelects = document.querySelectorAll('.custom-select');
 
-            customSelects.forEach(function(select) {
+            customSelects.forEach(function (select) {
                 const selected = select.querySelector('.select-selected');
                 const items = select.querySelector('.select-items');
                 const hiddenInput = select.nextElementSibling;
 
-                selected.addEventListener('click', function(e) {
+                selected.addEventListener('click', function (e) {
                     e.stopPropagation();
                     closeAllSelect(this);
                     this.classList.toggle('select-arrow-active');
                     items.classList.toggle('select-hide');
                 });
 
-                items.addEventListener('click', function(e) {
+                items.addEventListener('click', function (e) {
                     if (e.target.tagName === 'DIV') {
                         const value = e.target.getAttribute('data-value');
                         const text = e.target.textContent;
@@ -392,7 +392,7 @@
                 const selected = document.querySelectorAll('.select-selected');
                 const arrNo = [];
 
-                selected.forEach(function(sel, index) {
+                selected.forEach(function (sel, index) {
                     if (elmnt === sel) {
                         arrNo.push(index);
                     } else {
@@ -400,7 +400,7 @@
                     }
                 });
 
-                items.forEach(function(item, index) {
+                items.forEach(function (item, index) {
                     if (arrNo.indexOf(index) === -1) {
                         item.classList.add('select-hide');
                     }
@@ -412,114 +412,139 @@
 
         // 页面加载完成后初始化自定义下拉
         document.addEventListener('DOMContentLoaded', initCustomSelects);
-
         async function startChat() {
-            const cls = document.getElementById('className').value;
-            const stu = document.getElementById('studentId').value.trim();
-            const ses = document.getElementById('sessionNum').value;
-
-            // 基础校验
-            if (!cls) { alert("请先选择你的班级！"); return; }
-            if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
-            if (!ses) { alert("请选择当前的实验课次！"); return; }
-
-            const fullId = `${cls}_${stu}_${ses}`;
-
-            // 物理清空本地缓存，确保多用户严格隔离
-            localStorage.clear();
-            sessionStorage.clear();
-            if (window.indexedDB) {
-                window.indexedDB.deleteDatabase('coze_sdk_db');
-                window.indexedDB.deleteDatabase('coze-chat-sdk');
+            // 1. 先把权限检查函数定义好
+            async function checkMicPermission() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log("麦克风权限获取成功");
+                    stream.getTracks().forEach(track => track.stop()); // 用完即关，释放设备
+                    return true;
+                } catch (err) {
+                    console.error("麦克风权限被拒绝:", err);
+                    alert("请点击地址栏左侧‘锁头’图标，允许访问麦克风，否则语音功能无法使用。");
+                    return false;
+                }
             }
 
-            const inputGroup = document.getElementById('input-group');
-            const loaderWrapper = document.getElementById('loader-wrapper');
-            inputGroup.classList.add('fade-out');
+            const btn = document.getElementById('startBtn'); // 假设你的按钮 ID 是这个
 
-            setTimeout(() => {
-                inputGroup.style.display = 'none';
-                loaderWrapper.style.display = 'flex';
-            }, 400);
+            // 2. 所有的逻辑都要在点击这一刻发生
+            btn.onclick = async () => {
+                // 第一步：先拿数据
+                const cls = document.getElementById('className').value;
+                const stu = document.getElementById('studentId').value.trim();
+                const ses = document.getElementById('sessionNum').value;
 
-            try {
-                // 获取带着隔离签名的 Token
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: fullId })
-                });
-                
-                const result = await response.json();
-                const finalToken = result.data.token;
-                const safeId = result.data.user_id_hash;
+                // 第二步：基础校验（数据不对就别去弹麦克风请求了，省得干扰学生）
+                if (!cls) { alert("请先选择你的班级！"); return; }
+                if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
+                if (!ses) { alert("请选择当前的实验课次！"); return; }
 
-                document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
-                await new Promise(r => setTimeout(r, 600));
+                // 第三步：唤醒麦克风权限
+                const hasMic = await checkMicPermission();
+                if (!hasMic) return; // 没权限就停在这
 
-                const loginBox = document.getElementById('login-box');
-                loginBox.classList.add('card-exit');
+                // 第四步：权限和数据都 OK 了，开始走换 Token 和初始化 SDK 的流程
+                console.log("数据校验通过，权限已就绪，准备初始化智能体...");}
+
+                const fullId = `${cls}_${stu}_${ses}`;
+
+                // 物理清空本地缓存，确保多用户严格隔离
+                localStorage.clear();
+                sessionStorage.clear();
+                if (window.indexedDB) {
+                    window.indexedDB.deleteDatabase('coze_sdk_db');
+                    window.indexedDB.deleteDatabase('coze-chat-sdk');
+                }
+
+                const inputGroup = document.getElementById('input-group');
+                const loaderWrapper = document.getElementById('loader-wrapper');
+                inputGroup.classList.add('fade-out');
 
                 setTimeout(() => {
-                    loginBox.style.display = 'none';
-                    const container = document.getElementById('coze-container');
-                    container.style.display = 'block';
-                    container.offsetHeight;
-                    container.classList.add('show-time');
+                    inputGroup.style.display = 'none';
+                    loaderWrapper.style.display = 'flex';
+                }, 400);
 
-                    // 初始化扣子 Web SDK
-                    const chatClient = new window.CozeWebSDK.WebChatClient({
-                        config: { 
-                            bot_id: BOT_MAP[ses] 
-                        },
-                        auth: {
-                            type: 'token',
-                            token: finalToken,
-                            onRefreshToken: function () {
-                                return finalToken;
-                            }
-                        },
-                        userInfo: { id: safeId, nickname: `学生${stu}` },
-                        ui: {
-                            asstBtn: { isNeed: false },
-                            chatBot: {
-                                el: container,
-                                layout: 'pc',
-                                width: '100%',
-                                showHeader: false,
-                                // 开启默认语音模式
-                                voice: {
-                                    isNeed: true,
-                                    defaultVoice: true,
-                                }
-                            }
-                        }
+                try {
+                    // 获取带着隔离签名的 Token
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: fullId })
                     });
 
-                    chatClient.showChatBot();
+                    const result = await response.json();
+                    const finalToken = result.data.token;
+                    const safeId = result.data.user_id_hash;
 
-                    // 持续清理非必要按钮 (视需求保留)
-                    setInterval(() => {
-                        const svgs = document.querySelectorAll('svg');
-                        svgs.forEach(svg => {
-                            if (svg.innerHTML.includes('M4.96977') || svg.innerHTML.includes('M13.4997')) {
-                                const target = svg.closest('button') || svg.closest('div');
-                                if (target) target.remove();
+                    document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
+                    await new Promise(r => setTimeout(r, 600));
+
+                    const loginBox = document.getElementById('login-box');
+                    loginBox.classList.add('card-exit');
+
+                    setTimeout(() => {
+                        loginBox.style.display = 'none';
+                        const container = document.getElementById('coze-container');
+                        container.style.display = 'block';
+                        container.offsetHeight;
+                        container.classList.add('show-time');
+
+                        // 初始化扣子 Web SDK
+                        const chatClient = new window.CozeWebSDK.WebChatClient({
+                            config: {
+                                bot_id: BOT_MAP[ses]
+                            },
+                            auth: {
+                                type: 'token',
+                                token: finalToken,
+                                onRefreshToken: function () {
+                                    return finalToken;
+                                }
+                            },
+                            userInfo: { id: safeId, nickname: `学生${stu}` },
+                            ui: {
+                                asstBtn: { isNeed: false },
+                                chatBot: {
+                                    el: container,
+                                    layout: 'pc',
+                                    width: '100%',
+                                    showHeader: false,
+                                    // 开启默认语音模式
+                                    voice: {
+                                        isNeed: true,
+                                        defaultVoice: true,
+                                    }
+                                }
                             }
                         });
-                    }, 500);
 
-                }, 600);
+                        chatClient.showChatBot();
 
-            } catch (error) {
-                console.error(error);
-                alert("连接失败，请检查网络后重试！");
-                inputGroup.style.display = 'block';
-                inputGroup.classList.remove('fade-out');
-                loaderWrapper.style.display = 'none';
+                        // 持续清理非必要按钮 (视需求保留)
+                        setInterval(() => {
+                            const svgs = document.querySelectorAll('svg');
+                            svgs.forEach(svg => {
+                                if (svg.innerHTML.includes('M4.96977') || svg.innerHTML.includes('M13.4997')) {
+                                    const target = svg.closest('button') || svg.closest('div');
+                                    if (target) target.remove();
+                                }
+                            });
+                        }, 500);
+
+                    }, 600);
+
+                } catch (error) {
+                    console.error(error);
+                    alert("连接失败，请检查网络后重试！");
+                    inputGroup.style.display = 'block';
+                    inputGroup.classList.remove('fade-out');
+                    loaderWrapper.style.display = 'none';
+                }
             }
-        }
     </script>
 </body>
-
+        
 </html>
