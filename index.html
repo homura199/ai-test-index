@@ -425,6 +425,21 @@
 
             const fullId = `${cls}_${stu}_${ses}`;
 
+            // ==========================================
+            // 【只新增了这里：提前唤醒麦克风权限】
+            // ==========================================
+            try {
+                // 强制浏览器弹出麦克风授权窗口
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // 拿到权限后立刻关掉，把设备还给系统，避免与后面的 SDK 冲突
+                stream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                console.error("麦克风权限获取失败:", err);
+                alert("语音交互需要麦克风权限！请点击浏览器地址栏左侧的‘锁头’图标，设为‘允许’后再开始实验。");
+                return; // 如果没拿到权限，直接阻断，不往下执行
+            }
+            // ==========================================
+
             // 物理清空本地缓存，确保多用户严格隔离
             localStorage.clear();
             sessionStorage.clear();
