@@ -401,6 +401,7 @@
         document.getElementById('loader-wrapper').style.display = 'block';
 
         // --- 6. 后端换票 ---
+
         let finalToken = "";
         const fullId = `${cls}_${stu}_${ses}`; 
 
@@ -412,20 +413,21 @@
             });
             const result = await response.json();
 
-            if (result.token) {
-                finalToken = result.token;
+            // 【关键修复点】：严格按照后端返回的 JSON 结构提取数据
+            if (result.code === 0 && result.data && result.data.token) {
+                finalToken = result.data.token;
             } else {
-                throw new Error("后端返回 Token 为空");
+                console.error("解析 Token 失败，后端真实返回内容:", result);
+                throw new Error("后端返回的 JSON 结构中找不到 data.token");
             }
         } catch (err) {
-            console.error("Token 获取失败:", err);
-            alert("服务器连接失败，请检查网络或稍后再试。");
-            // 失败后恢复初始状态
+            console.error("换票流程异常:", err);
+            alert("服务器返回数据格式不匹配或网络异常，请查看 F12 控制台。");
+            // 失败后恢复初始状态，让用户可以重新点击
             document.getElementById('loader-wrapper').style.display = 'none';
             document.getElementById('input-group').style.display = 'block';
             return;
         }
-
         // --- 7. UI 状态切换：隐藏卡片，显示对话框 ---
         document.getElementById('login-box').style.display = 'none'; // 隐藏整个登录卡片
         container.style.display = 'block'; // 显示扣子容器
