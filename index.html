@@ -413,7 +413,7 @@
             });
             const result = await response.json();
 
-            // 【关键修复点】：严格按照后端返回的 JSON 结构提取数据
+            
             if (result.code === 0 && result.data && result.data.token) {
                 finalToken = result.data.token;
             } else {
@@ -448,7 +448,7 @@
                     title: `实验进行中 - 学号: ${stu}`,
                     upload: { isNeed: true },
                     voice: {
-                        VoiceisNeed: true,        
+                        isNeedAudio: true,        
                         defaultVoice: false  
                     }
                 }
