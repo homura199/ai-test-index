@@ -274,6 +274,19 @@
                 transform: scale(1);
             }
         }
+
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] img {
+            display: none !important;
+        }
+
+        /* 2. 在文字前面强行塞一个 Emoji 或其他图标 */
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] .coze-chat-sdk-semi-button-content::before {
+            content: "📝";
+           
+            font-size: 14px;
+            margin-right: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -356,19 +369,19 @@
         function initCustomSelects() {
             const customSelects = document.querySelectorAll('.custom-select');
 
-            customSelects.forEach(function(select) {
+            customSelects.forEach(function (select) {
                 const selected = select.querySelector('.select-selected');
                 const items = select.querySelector('.select-items');
                 const hiddenInput = select.nextElementSibling;
 
-                selected.addEventListener('click', function(e) {
+                selected.addEventListener('click', function (e) {
                     e.stopPropagation();
                     closeAllSelect(this);
                     this.classList.toggle('select-arrow-active');
                     items.classList.toggle('select-hide');
                 });
 
-                items.addEventListener('click', function(e) {
+                items.addEventListener('click', function (e) {
                     if (e.target.tagName === 'DIV') {
                         const value = e.target.getAttribute('data-value');
                         const text = e.target.textContent;
@@ -392,7 +405,7 @@
                 const selected = document.querySelectorAll('.select-selected');
                 const arrNo = [];
 
-                selected.forEach(function(sel, index) {
+                selected.forEach(function (sel, index) {
                     if (elmnt === sel) {
                         arrNo.push(index);
                     } else {
@@ -400,7 +413,7 @@
                     }
                 });
 
-                items.forEach(function(item, index) {
+                items.forEach(function (item, index) {
                     if (arrNo.indexOf(index) === -1) {
                         item.classList.add('select-hide');
                     }
@@ -413,7 +426,7 @@
         // 页面加载完成后初始化自定义下拉
         document.addEventListener('DOMContentLoaded', initCustomSelects);
 
-      async function startChat() {
+        async function startChat() {
             const cls = document.getElementById('className').value;
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value;
@@ -434,7 +447,7 @@
             } catch (err) {
                 console.error("麦克风权限获取失败:", err);
                 alert("语音功能需要麦克风权限！请点击浏览器地址栏左侧的‘锁’图标，设为‘允许’后再开始实验。");
-                return; 
+                return;
             }
 
             // 物理清空本地缓存，确保多用户严格隔离
@@ -461,7 +474,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: fullId })
                 });
-                
+
                 const result = await response.json();
                 const finalToken = result.data.token;
                 const safeId = result.data.user_id_hash;
@@ -483,7 +496,7 @@
                     // 严格按照官方文档重构的 SDK 初始化
                     // ==========================================
                     const chatClient = new window.CozeWebSDK.WebChatClient({
-                        config: { 
+                        config: {
                             type: 'bot',
                             bot_id: BOT_MAP[ses],
                             isIframe: false // 官方建议：内嵌模式规避跨域限制
@@ -495,9 +508,9 @@
                                 return finalToken;
                             }
                         },
-                        userInfo: { 
-                            id: safeId, 
-                            nickname: `学生${stu}` 
+                        userInfo: {
+                            id: safeId,
+                            nickname: `学生${stu}`
                         },
                         ui: {
                             base: {
@@ -508,7 +521,7 @@
                             header: {
                                 isShow: false // 隐藏顶部标题栏
                             },
-                            asstBtn: { 
+                            asstBtn: {
                                 isNeed: false // 隐藏悬浮球，采用内嵌展开
                             },
                             chatBot: {
@@ -516,8 +529,8 @@
                                 width: '100%',
                                 uploadable: false,
                                 isNeedAudio: true, // 【核心修正】：官方要求的开启语音参数
-                                isNeedAddNewConversation: true, 
-                                isNeedQuote: true 
+                                isNeedAddNewConversation: true,
+                                isNeedQuote: true
                             }
                         }
                     });
