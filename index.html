@@ -278,9 +278,19 @@
         button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] img {
             display: none !important;
         }
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段二"] img {
+            display: none !important;
+        }
 
         /* 2. 在文字前面强行塞一个 Emoji 或其他图标 */
         button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] .coze-chat-sdk-semi-button-content::before {
+            content: "📝";
+           
+            font-size: 14px;
+            margin-right: 4px;
+            display: inline-block;
+        }
+                button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段二"] .coze-chat-sdk-semi-button-content::before {
             content: "📝";
            
             font-size: 14px;
