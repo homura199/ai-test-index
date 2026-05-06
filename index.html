@@ -501,7 +501,7 @@
 
             // 基础校验
             if (!cls) { alert("请先选择你的班级！"); return; }
-            if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
+            if (!stu) { alert("请选择你的学号！"); return; }
             if (!ses) { alert("请选择当前的实验课次！"); return; }
 
             const fullId = `${cls}_${stu}_${ses}`;
