@@ -415,9 +415,14 @@
     <div id="coze-container"></div>
 
     <script>
+        // ==========================================
+        // 系统全局配置
+        // ==========================================
+        // 后端云函数地址，用于生成带签名的身份验证Token
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
 
-        // 请确保在这里填入你 10 个课次对应的真实 BOT_ID
+        // 根据选择的课次映射对应的AI机器人ID
+        // 保证不同课次使用不同的AI训练模型和知识库
         const BOT_MAP = {
             "1": "7634222430592139327",
             "2": "7634222430592139327",
@@ -431,43 +436,55 @@
             "10": "7634222430592139327"
         };
 
+        // 防止学生意外关闭页面而丢失实验进度
         window.onbeforeunload = function () { return "实验正在进行，离开将丢失当前进度。"; };
 
+        // ==========================================
         // 自定义下拉列表功能
+        // 说明：原生的HTML select元素无法完全满足设计需求，
+        //      此函数创建了一个完全自定义样式的下拉菜单
+        // ==========================================
         function initCustomSelects() {
+            // 获取页面中所有的自定义下拉列表元素
             const customSelects = document.querySelectorAll('.custom-select');
 
             customSelects.forEach(function (select) {
-                const selected = select.querySelector('.select-selected');
-                const items = select.querySelector('.select-items');
-                const hiddenInput = select.nextElementSibling;
+                const selected = select.querySelector('.select-selected');      // 显示当前选项的元素
+                const items = select.querySelector('.select-items');            // 下拉菜单列表
+                const hiddenInput = select.nextElementSibling;                 // 存储选择值的隐藏输入框
 
+                // 点击显示框时展开/收起菜单
                 selected.addEventListener('click', function (e) {
                     e.stopPropagation();
                     closeAllSelect(this);
-                    this.classList.toggle('select-arrow-active');
-                    items.classList.toggle('select-hide');
+                    this.classList.toggle('select-arrow-active');              // 改变箭头方向
+                    items.classList.toggle('select-hide');                     // 显示/隐藏菜单
                 });
 
+                // 在菜单中选择项目时，更新显示内容和隐藏值
                 items.addEventListener('click', function (e) {
                     if (e.target.tagName === 'DIV') {
                         const value = e.target.getAttribute('data-value');
                         const text = e.target.textContent;
 
+                        // 更新显示文本
                         selected.textContent = text;
+                        // 在隐藏字段中保存实际值（供后续JavaScript使用）
                         hiddenInput.value = value;
 
-                        // 更新选中状态
+                        // 更新视觉上的选中状态
                         const allItems = items.querySelectorAll('div');
                         allItems.forEach(item => item.classList.remove('same-as-selected'));
                         e.target.classList.add('same-as-selected');
 
+                        // 选择完成后关闭菜单
                         selected.classList.remove('select-arrow-active');
                         items.classList.add('select-hide');
                     }
                 });
             });
 
+            // 辅助函数：关闭除指定外的所有下拉菜单
             function closeAllSelect(elmnt) {
                 const items = document.querySelectorAll('.select-items');
                 const selected = document.querySelectorAll('.select-selected');
@@ -488,47 +505,65 @@
                 });
             }
 
+            // 点击页面其他地方时关闭所有菜单
             document.addEventListener('click', closeAllSelect);
         }
 
-        // 页面加载完成后初始化自定义下拉
+        // 页面加载完成后初始化所有自定义下拉菜单
         document.addEventListener('DOMContentLoaded', initCustomSelects);
 
+        // ==========================================
+        // 核心函数：开始实验的完整流程
+        // ==========================================
         async function startChat() {
+            // 获取用户在表单中选择的信息
             const cls = document.getElementById('className').value;
             const stu = document.getElementById('studentId').value.trim();
             const ses = document.getElementById('sessionNum').value;
 
-            // 基础校验
+            // 表单验证：确保用户已填写所有必需信息
             if (!cls) { alert("请先选择你的班级！"); return; }
             if (!stu) { alert("请选择你的学号！"); return; }
             if (!ses) { alert("请选择当前的实验课次！"); return; }
 
-            const fullId = `${cls}_${stu}_${ses}`;
+            // 组合学生标识信息，后续用于加密和签名
+            const fullId = `${cls}_${stu}_{ses}`;
 
             // ==========================================
-            // 麦克风权限强制唤醒 (防止静默失败)
+            // 第一步：申请麦克风权限
+            // 说明：实验平台需要语音交互，必须获得麦克风访问权限
+            //      提前申请保证正常进行
             // ==========================================
             try {
+                // 请求麦克风访问权限
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop()); // 用完即关，释放占用
+                // 立即释放资源，仅用于权限申请
+                stream.getTracks().forEach(track => track.stop());
             } catch (err) {
                 console.error("麦克风权限获取失败:", err);
-                alert("语音功能需要麦克风权限！请点击浏览器地址栏左侧的‘锁’图标，设为‘允许’后再开始实验。");
+                alert("语音功能需要麦克风权限！请点击浏览器地址栏左侧的'锁'图标，设为'允许'后再开始实验。");
                 return;
             }
 
-            // 物理清空本地缓存，确保多用户严格隔离
+            // ==========================================
+            // 第二步：清空本地缓存和会话数据
+            // 说明：多个学生共用同一设备时，必须完全清空前一个用户的数据
+            //      确保不同用户之间的严格隔离和数据安全
+            // ==========================================
+            // 清空浏览器本地存储
             localStorage.clear();
+            // 清空会话存储
             sessionStorage.clear();
+            // 清空IndexedDB（Coze SDK使用的本地数据库）
             if (window.indexedDB) {
                 window.indexedDB.deleteDatabase('coze_sdk_db');
                 window.indexedDB.deleteDatabase('coze-chat-sdk');
             }
 
+            // UI切换：隐藏登录表单，显示加载状态
             const inputGroup = document.getElementById('input-group');
             const loaderWrapper = document.getElementById('loader-wrapper');
-            inputGroup.classList.add('fade-out');
+            inputGroup.classList.add('fade-out');                              // 淡出动画
 
             setTimeout(() => {
                 inputGroup.style.display = 'none';
@@ -536,7 +571,11 @@
             }, 400);
 
             try {
-                // 获取带着隔离签名的 Token
+                // ==========================================
+                // 第三步：向后端申请认证Token
+                // 说明：后端会根据学号生成一个带签名的Token，
+                //      用于初始化Coze SDK并建立安全的通信链接
+                // ==========================================
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -547,9 +586,11 @@
                 const finalToken = result.data.token;
                 const safeId = result.data.user_id_hash;
 
+                // 更新加载提示信息
                 document.getElementById('loading-text').innerText = "验证成功，正在连接 AI...";
                 await new Promise(r => setTimeout(r, 600));
 
+                // UI过渡：登录卡片退出
                 const loginBox = document.getElementById('login-box');
                 loginBox.classList.add('card-exit');
 
@@ -557,62 +598,67 @@
                     loginBox.style.display = 'none';
                     const container = document.getElementById('coze-container');
                     container.style.display = 'block';
-                    container.offsetHeight;
-                    container.classList.add('show-time');
+                    container.offsetHeight;                                    // 触发重排以应用样式
+                    container.classList.add('show-time');                      // 淡入动画
 
                     // ==========================================
-                    // 严格按照官方文档重构的 SDK 初始化
+                    // 第四步：初始化Coze AI聊天SDK
+                    // 说明：这是连接Coze后台AI的核心配置，
+                    //      包括机器人ID、认证Token、用户信息等
                     // ==========================================
                     const chatClient = new window.CozeWebSDK.WebChatClient({
+                        // 机器人配置
                         config: {
                             type: 'bot',
-                            bot_id: BOT_MAP[ses],
-                            isIframe: false // 官方建议：内嵌模式规避跨域限制
+                            bot_id: BOT_MAP[ses],                              // 根据课次选择对应的AI机器人
+                            isIframe: false                                    // 使用内嵌模式避免跨域问题
                         },
+                        // 身份认证配置
                         auth: {
                             type: 'token',
-                            token: finalToken,
+                            token: finalToken,                                 // 使用后端生成的认证Token
                             onRefreshToken: function () {
-                                return finalToken;
+                                return finalToken;                             // Token自动刷新逻辑
                             }
                         },
+                        // 用户信息配置
                         userInfo: {
-                            id: safeId,
-                            nickname: `学生${stu}`
+                            id: safeId,                                        // 加密后的用户ID，用于服务端追踪
+                            nickname: `学生${stu}`                              // 显示名称
                         },
+                        // UI和功能配置
                         ui: {
                             base: {
                                 layout: 'pc',
-                                
                                 zIndex: 1000
                             },
                             header: {
-                                isShow: false // 隐藏顶部标题栏
+                                isShow: false                                  // 隐藏顶部标题栏
                             },
                             asstBtn: {
-                                isNeed: false // 隐藏悬浮球，采用内嵌展开
+                                isNeed: false                                  // 隐藏悬浮球，改用内嵌展开
                             },
                             chatBot: {
                                 el: container,
                                 width: '100%',
                                 uploadable: false,
-                                isNeedAudio: true, // 【核心修正】：官方要求的开启语音参数
+                                isNeedAudio: true,                             // 启用语音交互功能
                                 isNeedAddNewConversation: true,
                                 isNeedQuote: true
                             }
                         }
                     });
 
-                    // 强制展开聊天框
+                    // 显示聊天界面
                     chatClient.showChatBot();
-
-                    // 【致命的 setInterval 定时器已被彻底删除，告别崩溃白屏】
 
                 }, 600);
 
             } catch (error) {
+                // 错误处理：记录错误日志并恢复UI状态
                 console.error(error);
                 alert("连接失败，请检查网络后重试！");
+                // 恢复登录界面
                 inputGroup.style.display = 'block';
                 inputGroup.classList.remove('fade-out');
                 loaderWrapper.style.display = 'none';

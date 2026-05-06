@@ -2,42 +2,47 @@ import hashlib
 import pandas as pd
 
 # ==========================================
-# 1. 瞬间生成属于你的“彩虹表”字典
+# 第一步：构建哈希反向查询表（彩虹表）
+# 说明：通过穷举学号组合计算MD5，建立哈希值与原始信息的映射关系
+#      用于后续数据解密
 # ==========================================
 hash_mapping = {}
 
-# 遍历你前端所有可能的选项组合（假设：1-6班，1-99号，1-4课次）
-for cls in range(1, 7):
-    for stu in range(1, 100):
-        for ses in range(1, 5):
-            # 拼装当时前端传给云函数的原始明文格式
+# 三层循环生成所有可能的学生标识组合
+for cls in range(1, 7):                  # 班级：1班～6班
+    for stu in range(1, 100):            # 学号：1～99号
+        for ses in range(1, 5):          # 课次：1～4课次
+            # 构建学生身份字符串（未加密的原始明文）
             plain_text = f"{cls}班_{stu}_{ses}"
             
-            # 模拟后端的 MD5 加密过程 (生成 32位 字符串)
-            # ⚠️ 注意：如果你后端代码里除了 md5 还加了“盐(salt)”，这里要保持一致
+            # 用MD5算法加密生成32位哈希值
+            # 注意：如果后端添加了盐值(salt)，这里需要保持一致！
             hash_val = hashlib.md5(plain_text.encode('utf-8')).hexdigest()
             
-            # 存入反向映射字典: { '哈希值': '明文' }
+            # 将哈希值映射到原始明文，建立反向查询表
+            # 这样可以通过哈希值还原出真实的学生信息
             hash_mapping[hash_val] = plain_text
 
-print(f"✅ 成功生成映射字典，覆盖 {len(hash_mapping)} 种学号组合！")
+# 显示生成结果
+print(f"✅ 映射表生成完成，共 {len(hash_mapping)} 条记录")
 
 
 # ==========================================
-# 2. 模拟真实数据清洗流程
+# 第二步：数据清洗和反向解密
+# 说明：读取API导出的日志数据，将加密的用户ID还原为原始信息
 # ==========================================
-# 假设你读取了扣子后台导出的 CSV 数据
-# df = pd.read_csv('coze_exported_logs.csv')
+# 实际使用时应该从文件读取：df = pd.read_csv('coze_exported_logs.csv')
 
-# 【测试用的假数据】
-data = {'coze_user_id': ['084e0343a0486ff05530df6c705c8bb4', 'c4ca4238a0b923820dcc509a6f75849b']} 
+# 模拟从Coze后台导出的数据（包含加密的用户ID）
+data = {'coze_user_id': ['bf0658374779eda2819acd4d40961c50']} 
 df = pd.DataFrame(data)
 
-# 🚀 核心魔法：一键把哈希乱码全部映射回明文！
+# 核心步骤：用前面构建的映射表将加密的哈希值转换回明文
 df['real_user_info'] = df['coze_user_id'].map(hash_mapping)
 
-# 再顺手用下划线拆开，直接变成结构化的 3 列，完美对接后续的数据分析
+# 将原始信息按照下划线分割，得到结构化的数据列
+# 便于后续进行学号、班级等维度的统计分析
 df[['班级', '学号', '课次']] = df['real_user_info'].str.split('_', expand=True)
 
-print("\n清洗后的数据：")
+print("\n✓ 数据清洗完成，结果如下：")
 print(df)
