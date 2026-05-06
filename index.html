@@ -333,9 +333,9 @@
 
     <div id="coze-container"></div>
 
-    <script>
+   <script>
     // 1. 全局配置
-    const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
+    const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com/release/token"; // 确认为你的真实换票接口
 
     // 课次对应的真实 BOT_ID 映射
     const BOT_MAP = {
@@ -355,38 +355,31 @@
     window.onbeforeunload = function () { return "实验正在进行，离开将丢失当前进度。"; };
 
     /**
-     * 启动智能体的主函数
+     * 启动智能体的主函数 (由 HTML 里的 onclick="startChat()" 触发)
      */
     async function startChat() {
         // --- 1. 获取前端数据 ---
         const cls = document.getElementById('className').value;
         const stu = document.getElementById('studentId').value.trim();
         const ses = document.getElementById('sessionNum').value;
-        const container = document.getElementById('chat-container');
+        const container = document.getElementById('coze-container'); // 【匹配HTML】
 
         // --- 2. 基础校验 ---
-        if (!cls || !stu || !ses) {
-            alert("请完整填写班级、学号和课次信息！");
-            return;
-        }
+        if (!cls) { alert("请先选择所在班级！"); return; }
+        if (!stu || parseInt(stu) < 1 || parseInt(stu) >= 100) { alert("请输入 1-99 之间的有效学号！"); return; }
+        if (!ses) { alert("请选择实验课次！"); return; }
 
-        // 根据课次获取对应的 Bot ID
         const targetBotId = BOT_MAP[ses];
-        if (!targetBotId) {
-            alert("未找到该课次对应的智能体配置，请联系老师。");
-            return;
-        }
 
         // --- 3. 麦克风权限预检 ---
         async function checkMicPermission() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                console.log("麦克风硬件自检通过");
                 stream.getTracks().forEach(track => track.stop()); // 立即释放设备
                 return true;
             } catch (err) {
                 console.error("麦克风权限被拒绝:", err);
-                alert("语音功能需要麦克风权限，请点击地址栏左侧‘锁头’图标手动允许。");
+                alert("语音功能需要麦克风权限，请点击浏览器地址栏左侧‘锁头’图标选择‘允许’。");
                 return false;
             }
         }
@@ -394,21 +387,24 @@
         const hasMic = await checkMicPermission();
         if (!hasMic) return; 
 
-        // --- 4. 浏览器“物理清场” (解决会话隔离) ---
+        // --- 4. 浏览器“物理清场” ---
         localStorage.clear();
         sessionStorage.clear();
         if (window.indexedDB) {
             window.indexedDB.deleteDatabase('coze_sdk_db');
             window.indexedDB.deleteDatabase('coze-chat-sdk');
         }
-        console.log("清理历史缓存完成，准备进入独立房间...");
 
-        // --- 5. 后端换票 (从云函数获取 Token) ---
+        // --- 5. UI 状态切换：进入 Loading 状态 ---
+        // 隐藏输入框区域，显示加载动画
+        document.getElementById('input-group').style.display = 'none';
+        document.getElementById('loader-wrapper').style.display = 'block';
+
+        // --- 6. 后端换票 ---
         let finalToken = "";
         const fullId = `${cls}_${stu}_${ses}`; 
 
         try {
-            // 使用上面定义的 API_URL 变量
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -424,17 +420,20 @@
         } catch (err) {
             console.error("Token 获取失败:", err);
             alert("服务器连接失败，请检查网络或稍后再试。");
+            // 失败后恢复初始状态
+            document.getElementById('loader-wrapper').style.display = 'none';
+            document.getElementById('input-group').style.display = 'block';
             return;
         }
 
-        // --- 6. 切换 UI 状态 ---
-        document.getElementById('login-card').style.display = 'none';
-        container.style.display = 'block';
+        // --- 7. UI 状态切换：隐藏卡片，显示对话框 ---
+        document.getElementById('login-box').style.display = 'none'; // 隐藏整个登录卡片
+        container.style.display = 'block'; // 显示扣子容器
 
-        // --- 7. SDK 初始化 ---
+        // --- 8. SDK 初始化 ---
         new window.CozeWebSDK.WebChatClient({
             config: {
-                bot_id: targetBotId, // 【修正点】：使用根据课次匹配到的 Bot ID
+                bot_id: targetBotId, 
             },
             auth: {
                 type: 'token',
@@ -444,17 +443,15 @@
             ui: {
                 chatBot: {
                     el: container,
-                    title: `数字化实验 (学号: ${stu})`,
+                    title: `实验进行中 - 学号: ${stu}`,
                     upload: { isNeed: true },
                     voice: {
-                        isNeed: true,        // 开启语音输入
-                        defaultVoice: false, // 默认显示键盘，麦克风图标在侧边
+                        isNeed: true,        
+                        defaultVoice: false  
                     }
                 }
             }
         });
-
-        console.log("智能体挂载成功！当前身份指纹:", fullId);
     }
 
     // --- 下拉列表初始化逻辑 ---
@@ -465,6 +462,9 @@
             const selected = select.querySelector('.select-selected');
             const items = select.querySelector('.select-items');
             const hiddenInput = select.nextElementSibling;
+
+            // 修复：默认隐藏 items (为了防止页面刚加载时展开)
+            items.classList.add('select-hide'); 
 
             selected.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -498,7 +498,6 @@
                 if (elmnt !== sel) sel.classList.remove('select-arrow-active');
             });
             items.forEach(item => {
-                // 这里逻辑稍微简化，防止报错
                 if (!elmnt || !elmnt.nextElementSibling || item !== elmnt.nextElementSibling) {
                     item.classList.add('select-hide');
                 }
@@ -507,17 +506,6 @@
         document.addEventListener('click', () => closeAllSelect());
     }
 
-    // 页面加载完成后绑定事件
-    document.addEventListener('DOMContentLoaded', () => {
-        // 初始化下拉菜单
-        initCustomSelects();
-
-        // 绑定开始按钮
-        const startBtn = document.getElementById('startBtn');
-        if (startBtn) {
-            startBtn.onclick = startChat;
-        } else {
-            console.error("未找到开始按钮，请确认 HTML 中按钮 ID 为 startBtn");
-        }
-    });
+    // 页面加载完成后初始化下拉菜单
+    document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
