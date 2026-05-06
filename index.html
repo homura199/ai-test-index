@@ -432,8 +432,8 @@
         document.getElementById('login-box').style.display = 'none'; // 隐藏整个登录卡片
         container.style.display = 'block'; // 显示扣子容器
 
-        // --- 8. SDK 初始化 ---
-        new window.CozeWebSDK.WebChatClient({
+       // --- 8. SDK 初始化 ---
+        const chatClient = new window.CozeWebSDK.WebChatClient({
             config: {
                 bot_id: targetBotId, 
             },
@@ -443,17 +443,24 @@
                 onRefreshToken: () => finalToken,
             },
             ui: {
+                // 【被我弄丢的配置 1：隐藏右下角悬浮小图标】
+                asstBtn: {
+                    isNeed: false 
+                },
                 chatBot: {
                     el: container,
                     title: `实验进行中 - 学号: ${stu}`,
                     upload: { isNeed: true },
                     voice: {
-                        isNeedAudio: true,        
+                        isNeed: true,        // 拼写修正：必须是 isNeed
                         defaultVoice: false  
                     }
                 }
             }
         });
+
+        // 【被我弄丢的配置 2：强制直接把聊天界面铺开】
+        chatClient.showChatBot();
     }
 
     // --- 下拉列表初始化逻辑 ---
