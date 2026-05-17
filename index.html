@@ -312,14 +312,6 @@
                 <div class="select-items select-hide">
                     <div data-value="1班">1班</div>
                     <div data-value="2班">2班</div>
-                    <div data-value="3班">3班</div>
-                    <div data-value="4班">4班</div>
-                    <div data-value="5班">5班</div>
-                    <div data-value="6班">6班</div>
-                    <div data-value="7班">7班</div>
-                    <div data-value="8班">8班</div>
-                    <div data-value="9班">9班</div>
-                    <div data-value="10班">10班</div>
                 </div>
             </div>
             <input type="hidden" id="className" value="">
@@ -393,13 +385,6 @@
                     <div data-value="1">第 1 课次</div>
                     <div data-value="2">第 2 课次</div>
                     <div data-value="3">第 3 课次</div>
-                    <div data-value="4">第 4 课次</div>
-                    <div data-value="5">第 5 课次</div>
-                    <div data-value="6">第 6 课次</div>
-                    <div data-value="7">第 7 课次</div>
-                    <div data-value="8">第 8 课次</div>
-                    <div data-value="9">第 9 课次</div>
-                    <div data-value="10">第 10 课次</div>
                 </div>
             </div>
             <input type="hidden" id="sessionNum" value="">
@@ -422,19 +407,18 @@
         // 后端云函数地址，用于生成带签名的身份验证Token
         const API_URL = "https://1308037263-lxn5m4tut3.ap-guangzhou.tencentscf.com";
 
-        // 根据选择的课次映射对应的AI机器人ID
-        // 保证不同课次使用不同的AI训练模型和知识库
+        // 根据选择的班级和课次映射对应的AI机器人ID
         const BOT_MAP = {
-            "1": "7640411396727849002",
-            "2": "7640403705497632787",
-            "3": "7634222430592139327",
-            "4": "7634222430592139327",
-            "5": "7634222430592139327",
-            "6": "7634222430592139327",
-            "7": "7634222430592139327",
-            "8": "7634222430592139327",
-            "9": "7634222430592139327",
-            "10": "7634222430592139327"
+            "1班": {
+                "1": "7640403705497632787",
+                "2": "",
+                "3": ""
+            },
+            "2班": {
+                "1": "7640411396727849002",
+                "2": "",
+                "3": ""
+            }
         };
 
         // 防止学生意外关闭页面而丢失实验进度
@@ -527,6 +511,13 @@
             if (!stu) { alert("请选择你的学号！"); return; }
             if (!ses) { alert("请选择当前的实验课次！"); return; }
 
+            // 校验对应的智能体ID是否已确定
+            const targetBotId = BOT_MAP[cls] && BOT_MAP[cls][ses];
+            if (!targetBotId) {
+                alert("该课时的智能体还在配置中，暂无法开始实验，敬请期待！");
+                return;
+            }
+
             // 组合学生标识信息，后续用于加密和签名
             const fullId = `${cls}_${stu}_{ses}`;
 
@@ -611,7 +602,7 @@
                         // 机器人配置
                         config: {
                             type: 'bot',
-                            bot_id: BOT_MAP[ses],                              // 根据课次选择对应的AI机器人
+                            bot_id: targetBotId,                               // 根据班级和课次选择对应的AI机器人
                             isIframe: false                                    // 使用内嵌模式避免跨域问题
                         },
                         // 身份认证配置
