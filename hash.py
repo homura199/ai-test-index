@@ -11,15 +11,15 @@ hash_mapping = {}
 for cls_num in range(1, 3):                  # 班级：1、2
     cls = f"{cls_num}班"                     # 匹配前端选择的 "1班", "2班"
     for stu in range(1, 100):            # 学号：1～99号
-        # 前端代码为 `${cls}_${stu}_{ses}`，由于漏掉$导致 {ses} 变成了字面量
-        # Python f-string 中用 {{ses}} 转义出大括号，使其生成的明文与前端发来的数据完全一致
-        plain_text = f"{cls}_{stu}_{{ses}}"
-        
-        # 用MD5算法加密生成32位哈希值
-        hash_val = hashlib.md5(plain_text.encode('utf-8')).hexdigest()
-        
-        # 将哈希值映射到原始明文，建立反向查询表
-        hash_mapping[hash_val] = plain_text
+        for ses in range(1, 10):         # 课次：1～9 (预留足够课次范围)
+            # 匹配前端代码正确拼接的 `${cls}_${stu}_${ses}` 格式
+            plain_text = f"{cls}_{stu}_{ses}"
+            
+            # 用MD5算法加密生成32位哈希值
+            hash_val = hashlib.md5(plain_text.encode('utf-8')).hexdigest()
+            
+            # 将哈希值映射到原始明文，建立反向查询表
+            hash_mapping[hash_val] = plain_text
 
 print(f"✅ 映射表生成完成，共 {len(hash_mapping)} 条记录")
 
@@ -28,12 +28,12 @@ print(f"✅ 映射表生成完成，共 {len(hash_mapping)} 条记录")
 # 第二步：数据清洗和反向解密
 # 说明：读取包含聊天记录的CSV文件，将 user_id 列的反向解密成明文，并导出新文件
 # ==========================================
-input_file = "第一周-大白助理.csv"
-output_file = "明文解密_第一周-大白助理.csv"
+input_file = "小智老师L2.csv"
+output_file = "明文解密_小智老师L2.csv"
 
 try:
     # 读取原始CSV数据
-    df = pd.read_csv(input_file)
+    df = pd.read_csv(input_file, encoding='gbk') # 尝试使用 'gbk' 编码读取，解决中文乱码问题
     
     # 检查是否存在 user_id 列
     if 'user_id' in df.columns:
