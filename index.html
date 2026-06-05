@@ -776,11 +776,10 @@
                             bot_id: targetBotId,                               // 根据班级和课次选择对应的AI机器人
                             isIframe: false,                                   // 使用内嵌模式避免跨域问题
                             // 向智能体传递自定义变量，需确保智能体内已定义 language 变量
-                            botInfo: {
-                                parameters: {
+                            
                                     language: currentLang
-                                }
-                            }
+                                
+                            
                         },
                         // 身份认证配置
                         auth: {
