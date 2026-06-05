@@ -460,7 +460,8 @@
                 studentPrefix: "学生",
                 classFormat: "{val}班",
                 studentFormat: "{val} 号",
-                sessionFormat: "第 {val} 课次"
+                sessionFormat: "第 {val} 课次",
+                autoMsg: "我是{cls}班的{stu}号同学，让我们开始吧！"
             },
             en: {
                 pageTitle: "AI Intelligent Lab Platform",
@@ -485,7 +486,8 @@
                 studentPrefix: "Student ",
                 classFormat: "Class {val}",
                 studentFormat: "No. {val}",
-                sessionFormat: "Session {val}"
+                sessionFormat: "Session {val}",
+                autoMsg: "I am student No. {stu} from Class {cls}, let's start!"
             },
             ja: {
                 pageTitle: "AI インテリジェント実験プラットフォーム",
@@ -510,7 +512,8 @@
                 studentPrefix: "学生 ",
                 classFormat: "クラス {val}",
                 studentFormat: "{val} 番",
-                sessionFormat: "第 {val} セッション"
+                sessionFormat: "第 {val} セッション",
+                autoMsg: "私は{cls}クラスの{stu}番です。始めましょう！"
             },
             ko: {
                 pageTitle: "AI 지능형 실험 플랫폼",
@@ -535,7 +538,8 @@
                 studentPrefix: "학생 ",
                 classFormat: "{val}반",
                 studentFormat: "{val} 번",
-                sessionFormat: "제 {val} 세션"
+                sessionFormat: "제 {val} 세션",
+                autoMsg: "저는 {cls}반의 {stu}번 학생입니다. 시작합시다!"
             }
         };
 
@@ -772,8 +776,10 @@
                             bot_id: targetBotId,                               // 根据班级和课次选择对应的AI机器人
                             isIframe: false,                                   // 使用内嵌模式避免跨域问题
                             // 向智能体传递自定义变量，需确保智能体内已定义 language 变量
-                            custom_variables: {
-                                language: currentLang
+                            botInfo: {
+                                parameters: {
+                                    language: currentLang
+                                }
                             }
                         },
                         // 身份认证配置
@@ -814,6 +820,60 @@
 
                     // 显示聊天界面
                     chatClient.showChatBot();
+
+                    // ==========================================
+                    // 第五步：自动发送初始化聊天信息
+                    // ==========================================
+                    // 根据当前语言生成对应的打招呼文本
+                    const autoMsgText = i18n[currentLang].autoMsg.replace('{cls}', cls).replace('{stu}', stu);
+                    
+                    // 使用 MutationObserver 等待聊天界面加载，并找到输入框执行自动发送
+                    const observer = new MutationObserver((mutations, obs) => {
+                        const textarea = document.querySelector('#coze-container textarea');
+                        if (textarea) {
+                            // 断开监听器，因为我们已经找到了输入框
+                            obs.disconnect();
+
+                            // 关键：输入框出现不代表历史记录已经渲染完毕，DOM渲染和网络拉取是异步的。
+                            // 我们等待 1.2 秒给历史记录充分的加载时间，然后再检查 DOM
+                            setTimeout(() => {
+                                // 读取 DOM 中整个对话区域的纯文本
+                                const chatDOMText = document.querySelector('#coze-container').innerText || "";
+                                
+                                // 遍历所有语言，检查历史对话记录里是否已经存在任何一种语言的自动介绍文本
+                                let hasHistory = false;
+                                for (let langKey in i18n) {
+                                    const possibleMsg = i18n[langKey].autoMsg.replace('{cls}', cls).replace('{stu}', stu);
+                                    if (chatDOMText.includes(possibleMsg)) {
+                                        hasHistory = true;
+                                        break;
+                                    }
+                                }
+
+                                // 如果 DOM 中没有找到相关的历史记录痕迹，才执行自动发送
+                                if (!hasHistory) {
+                                    // 1. 设置输入框的值
+                                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                                    if (nativeInputValueSetter) {
+                                        nativeInputValueSetter.call(textarea, autoMsgText);
+                                    } else {
+                                        textarea.value = autoMsgText;
+                                    }
+                                    
+                                    // 2. 派发输入事件
+                                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                                    
+                                    // 3. 延迟小段时间模拟按下回车键
+                                    setTimeout(() => {
+                                        textarea.dispatchEvent(new KeyboardEvent('keydown', {
+                                            bubbles: true, cancelable: true, keyCode: 13, key: 'Enter', code: 'Enter'
+                                        }));
+                                    }, 100);
+                                }
+                            }, 1200); // 延迟判断，避免误判
+                        }
+                    });
+                    observer.observe(container, { childList: true, subtree: true });
 
                 }, 600);
 
