@@ -28,5 +28,6 @@
 - SCF的七项环境变量和运行角色已保存；512MB、120秒、公网访问开启。私有桶 `caitian-profiles-1308037263` 已确认私有读写且未开启版本控制。
 - 已创建函数URL：`https://1308037263-7d4qlm2zrr.ap-guangzhou.tencentscf.com`，开启参数兼容，使用应用自身CORS和管理密钥鉴权。
 - 已验证 `GET /health` 返回200，指定网站跨域预检204，缺少密钥的管理请求401，其他来源403，非法学生标识422。
-- 自动审批审核认为 `8班_55_1` 可能是真实学生，拒绝写入回环脚本；脚本未执行，未写入测试问卷。已请求用户确认空闲测试位置。真实COS写入、云端判级和完整登录链路仍待这次测试确认。
-- 新前端已通过Git推送发布到 `https://test.homura.cn/caitian-ai/`。当前 `profileAuthUrl` 仍为空，完成写入回环验收后再填入新函数的 `/auth` 地址并发布。
+- 用户确认8班55号可作为空闲测试位置并要求测试后清理。确认原问卷状态missing后，提交带有“部署回环测试”标识的虚构答案：接口200，约19.14秒返回ready。私有记录确认开放题70分、总分100、P3，来源为coze_semantic_dimensions。
+- `/auth` 返回200，bot_id为7706348792413011968，公开字段只有token、user_id_hash、profile_ref、bot_id。扣子999渠道回读确认Pn=3、P0=3；携带原profile_ref刷新令牌返回200且会话标识不变。测试脚本已恢复Pn/P0原值。
+- 新前端已接入 `https://1308037263-7d4qlm2zrr.ap-guangzhou.tencentscf.com/auth`，由Git推送发布到 `https://test.homura.cn/caitian-ai/`。
