@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+!.env.example
+.private/
+build/
+dist/
+*.csv
+*.xlsx
+*.xls
+*.docx
+*.zip

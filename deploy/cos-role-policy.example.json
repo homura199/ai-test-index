@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "statement": [
+    {
+      "effect": "allow",
+      "action": [
+        "name/cos:GetBucketVersioning"
+      ],
+      "resource": [
+        "qcs::cos:ap-guangzhou:uid/REPLACE_APPID:REPLACE_PRIVATE_BUCKET/*"
+      ]
+    },
+    {
+      "effect": "allow",
+      "action": [
+        "name/cos:GetObject",
+        "name/cos:PutObject"
+      ],
+      "resource": [
+        "qcs::cos:ap-guangzhou:uid/REPLACE_APPID:REPLACE_PRIVATE_BUCKET/lesson-one/profiles/*",
+        "qcs::cos:ap-guangzhou:uid/REPLACE_APPID:REPLACE_PRIVATE_BUCKET/lesson-one/submissions/*",
+        "qcs::cos:ap-guangzhou:uid/REPLACE_APPID:REPLACE_PRIVATE_BUCKET/lesson-one/tickets/*"
+      ]
+    }
+  ]
+}

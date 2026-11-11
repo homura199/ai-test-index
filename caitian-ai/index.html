@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩田学校 · AI 绘图测试</title>
+    <link rel="icon" href="data:;base64,=">
+    <link rel="stylesheet" href="./caitian-questionnaire.css">
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.18/libs/cn/index.js"></script>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --primary-color: #007AFF;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: radial-gradient(at 0% 0%, rgba(144, 202, 249, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(179, 157, 219, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 204, 225, 0.5) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(129, 212, 250, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(188, 170, 255, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+
+        .login-card {
+            position: relative;
+            width: 360px;
+            padding: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(255, 255, 255, 0.3) inset;
+            text-align: center;
+            transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            z-index: 10;
+        }
+
+        .login-card h3 {
+            margin: 0 0 30px 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1d1d1f 0%, #434343 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .label-text {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.6);
+            margin: 15px 0 5px 5px;
+            font-weight: 600;
+        }
+
+        select,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            appearance: none;
+            color: #1d1d1f;
+        }
+
+        /* 自定义下拉列表样式 */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .select-selected {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 15px;
+            color: #1d1d1f;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease, box-shadow 0.3s ease;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231d1d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            user-select: none;
+        }
+
+        .select-selected:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .select-selected.select-arrow-active {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='18 15 12 9 6 15'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .select-items {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border-radius: 14px;
+            margin-top: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 122, 255, 0.3) transparent;
+        }
+
+        .select-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .select-items::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .select-items::-webkit-scrollbar-thumb {
+            background: rgba(0, 122, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .select-items div {
+            padding: 12px 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            color: #1d1d1f;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .select-items div:last-child {
+            border-bottom: none;
+        }
+
+        .select-items div:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .select-items div.same-as-selected {
+            background: rgba(0, 122, 255, 0.15);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .select-hide {
+            display: none;
+        }
+
+        input:focus,
+        select:focus {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: var(--primary-color);
+        }
+
+        #login-box button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #0055FF 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* 动画控制 */
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.9);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .card-exit {
+            opacity: 0 !important;
+            transform: scale(0.9) translateY(-40px) !important;
+            filter: blur(20px) !important;
+        }
+
+        #coze-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #fff;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            filter: blur(10px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #coze-container.show-time {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+
+        #loader-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 122, 255, 0.1);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] img {
+            display: none !important;
+        }
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段二"] img {
+            display: none !important;
+        }
+
+        /* 2. 在文字前面强行塞一个 Emoji 或其他图标 */
+        button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] .coze-chat-sdk-semi-button-content::before {
+            content: "📝";
+           
+            font-size: 14px;
+            margin-right: 4px;
+            display: inline-block;
+        }
+                button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段二"] .coze-chat-sdk-semi-button-content::before {
+            content: "📝";
+           
+            font-size: 14px;
+            margin-right: 4px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card" id="login-box">
+        <div id="input-group">
+            <h3 data-i18n="mainTitle">彩田学校 · AI 绘图测试</h3>
+
+            <span class="label-text" data-i18n="langLabel">语言 / Language</span>
+            <div class="custom-select" id="lang-select-wrapper">
+                <div class="select-selected">中文</div>
+                <div class="select-items select-hide">
+                    <div data-value="zh" class="same-as-selected">中文</div>
+                    <div data-value="en">English</div>
+                    <div data-value="ja">日本語</div>
+                    <div data-value="ko">한국어</div>
+                </div>
+            </div>
+            <input type="hidden" id="lang" value="zh">
+
+            <span class="label-text" data-i18n="classLabel">所在班级</span>
+            <div class="custom-select" id="className-select">
+                <div class="select-selected" data-i18n="classSelect">选择班级</div>
+                <div class="select-items select-hide">
+                    <div data-value="1">1班</div>
+                    <div data-value="2">2班</div>
+                    <div data-value="3">3班</div>
+                    <div data-value="4">4班</div>
+                    <div data-value="5">5班</div>
+                    <div data-value="6">6班</div>
+                    <div data-value="7">7班</div>
+                    <div data-value="8">8班</div>
+                </div>
+            </div>
+            <input type="hidden" id="className" value="">
+
+            <span class="label-text" data-i18n="studentIdLabel">你的学号</span>
+            <div class="custom-select" id="studentId-select">
+                <div class="select-selected" data-i18n="studentIdSelect">选择学号</div>
+                <div class="select-items select-hide">
+                    <div data-value="1">1 号</div>
+                    <div data-value="2">2 号</div>
+                    <div data-value="3">3 号</div>
+                    <div data-value="4">4 号</div>
+                    <div data-value="5">5 号</div>
+                    <div data-value="6">6 号</div>
+                    <div data-value="7">7 号</div>
+                    <div data-value="8">8 号</div>
+                    <div data-value="9">9 号</div>
+                    <div data-value="10">10 号</div>
+                    <div data-value="11">11 号</div>
+                    <div data-value="12">12 号</div>
+                    <div data-value="13">13 号</div>
+                    <div data-value="14">14 号</div>
+                    <div data-value="15">15 号</div>
+                    <div data-value="16">16 号</div>
+                    <div data-value="17">17 号</div>
+                    <div data-value="18">18 号</div>
+                    <div data-value="19">19 号</div>
+                    <div data-value="20">20 号</div>
+                    <div data-value="21">21 号</div>
+                    <div data-value="22">22 号</div>
+                    <div data-value="23">23 号</div>
+                    <div data-value="24">24 号</div>
+                    <div data-value="25">25 号</div>
+                    <div data-value="26">26 号</div>
+                    <div data-value="27">27 号</div>
+                    <div data-value="28">28 号</div>
+                    <div data-value="29">29 号</div>
+                    <div data-value="30">30 号</div>
+                    <div data-value="31">31 号</div>
+                    <div data-value="32">32 号</div>
+                    <div data-value="33">33 号</div>
+                    <div data-value="34">34 号</div>
+                    <div data-value="35">35 号</div>
+                    <div data-value="36">36 号</div>
+                    <div data-value="37">37 号</div>
+                    <div data-value="38">38 号</div>
+                    <div data-value="39">39 号</div>
+                    <div data-value="40">40 号</div>
+                    <div data-value="41">41 号</div>
+                    <div data-value="42">42 号</div>
+                    <div data-value="43">43 号</div>
+                    <div data-value="44">44 号</div>
+                    <div data-value="45">45 号</div>
+                    <div data-value="46">46 号</div>
+                    <div data-value="47">47 号</div>
+                    <div data-value="48">48 号</div>
+                    <div data-value="49">49 号</div>
+                    <div data-value="50">50 号</div>
+                    <div data-value="51">51 号</div>
+                    <div data-value="52">52 号</div>
+                    <div data-value="53">53 号</div>
+                    <div data-value="54">54 号</div>
+                    <div data-value="55">55 号</div>
+                </div>
+            </div>
+            <input type="hidden" id="studentId" value="">
+            <span class="label-text" data-i18n="sessionLabel">实验课次</span>
+            <div class="custom-select" id="sessionNum-select">
+                <div class="select-selected" data-i18n="sessionSelect">选择课次</div>
+                <div class="select-items select-hide">
+                    <div data-value="1">第 1 课次</div>
+                </div>
+            </div>
+            <input type="hidden" id="sessionNum" value="">
+
+            <button onclick="startChat()" data-i18n="startBtn">开始实验</button>
+        </div>
+
+        <div id="loader-wrapper">
+            <div class="spinner"></div>
+            <p id="loading-text" data-i18n="loadingInit" style="margin-top:20px; color:rgba(0,0,0,0.5); font-size:14px;">环境初始化中...</p>
+        </div>
+    </div>
+
+    <div id="coze-container"></div>
+
+    <script src="./caitian-config.js"></script>
+    <script src="./caitian-session.js"></script>
+    <script src="./caitian-questionnaire.js"></script>
+    <script>
+        // ==========================================
+        // 系统全局配置
+        // ==========================================
+        let chatStarting = false;
+        let chatActive = false;
+        let questionnaireDirty = false;
+
+        // ==========================================
+        // 国际化支持 (i18n)
+        // ==========================================
+        const i18n = {
+            zh: {
+                pageTitle: "彩田学校 · AI 绘图测试",
+                mainTitle: "彩田学校 · AI 绘图测试",
+                langLabel: "系统语言 / Language",
+                classLabel: "所在班级",
+                studentIdLabel: "你的学号",
+                sessionLabel: "实验课次",
+                classSelect: "选择班级",
+                studentIdSelect: "选择学号",
+                sessionSelect: "选择课次",
+                startBtn: "开始实验",
+                loadingInit: "环境初始化中...",
+                loadingSuccess: "验证成功，正在连接 AI...",
+                alertClass: "请先选择你的班级！",
+                alertStudent: "请选择你的学号！",
+                alertSession: "请选择当前的实验课次！",
+                alertConfig: "该课时的智能体还在配置中，暂无法开始实验，敬请期待！",
+                alertMic: "语音功能需要麦克风权限！请点击浏览器地址栏左侧的'锁'图标，设为'允许'后再开始实验。",
+                alertFail: "连接失败，请检查网络后重试！",
+                leaveWarning: "实验正在进行，离开将丢失当前进度。",
+                studentPrefix: "学生",
+                classFormat: "{val}班",
+                studentFormat: "{val} 号",
+                sessionFormat: "第 {val} 课次"
+            },
+            en: {
+                pageTitle: "Caitian School · AI Drawing Test",
+                mainTitle: "Caitian School · AI Drawing Test",
+                langLabel: "Language / 系统语言",
+                classLabel: "Class",
+                studentIdLabel: "Student ID",
+                sessionLabel: "Lab Session",
+                classSelect: "Select Class",
+                studentIdSelect: "Select ID",
+                sessionSelect: "Select Session",
+                startBtn: "Start Experiment",
+                loadingInit: "Initializing environment...",
+                loadingSuccess: "Verification successful, connecting to AI...",
+                alertClass: "Please select your class first!",
+                alertStudent: "Please select your student ID!",
+                alertSession: "Please select the current lab session!",
+                alertConfig: "The AI agent for this session is still being configured. Please stay tuned!",
+                alertMic: "Voice interaction requires microphone permission! Please allow it in your browser settings.",
+                alertFail: "Connection failed, please check your network and try again!",
+                leaveWarning: "Experiment in progress. Leaving will lose your current progress.",
+                studentPrefix: "Student ",
+                classFormat: "Class {val}",
+                studentFormat: "No. {val}",
+                sessionFormat: "Session {val}"
+            },
+            ja: {
+                pageTitle: "彩田学校 · AI 描画テスト",
+                mainTitle: "彩田学校 · AI 描画テスト",
+                langLabel: "言語 / Language",
+                classLabel: "クラス",
+                studentIdLabel: "学籍番号",
+                sessionLabel: "セッション",
+                classSelect: "クラスを選択",
+                studentIdSelect: "学籍番号を選択",
+                sessionSelect: "セッションを選択",
+                startBtn: "実験を開始",
+                loadingInit: "環境を初期化しています...",
+                loadingSuccess: "検証に成功しました。AIに接続しています...",
+                alertClass: "まずクラスを選択してください！",
+                alertStudent: "学籍番号を選択してください！",
+                alertSession: "現在の実験セッションを選択してください！",
+                alertConfig: "このセッションのAIエージェントはまだ設定中です。しばらくお待ちください！",
+                alertMic: "音声機能にはマイクへのアクセス権限が必要です！ブラウザのアドレスバーにある「鍵」アイコンをクリックし、「許可」に設定してから実験を開始してください。",
+                alertFail: "接続に失敗しました。ネットワークを確認して再試行してください！",
+                leaveWarning: "実験が進行中です。離脱すると現在の進行状況が失われます。",
+                studentPrefix: "学生 ",
+                classFormat: "クラス {val}",
+                studentFormat: "{val} 番",
+                sessionFormat: "第 {val} セッション"
+            },
+            ko: {
+                pageTitle: "차이톈 학교 · AI 그림 테스트",
+                mainTitle: "차이톈 학교 · AI 그림 테스트",
+                langLabel: "언어 / Language",
+                classLabel: "소속 반",
+                studentIdLabel: "학번",
+                sessionLabel: "실험 세션",
+                classSelect: "반 선택",
+                studentIdSelect: "학번 선택",
+                sessionSelect: "세션 선택",
+                startBtn: "실험 시작",
+                loadingInit: "환경 초기화 중...",
+                loadingSuccess: "검증 성공, AI 연결 중...",
+                alertClass: "먼저 반을 선택해주세요!",
+                alertStudent: "학번을 선택해주세요!",
+                alertSession: "현재 실험 세션을 선택해주세요!",
+                alertConfig: "해당 세션의 AI 에이전트가 아직 구성 중입니다. 잠시만 기다려주세요!",
+                alertMic: "음성 기능을 사용하려면 마이크 권한이 필요합니다! 브라우저 주소창 왼쪽의 '자물쇠' 아이콘을 클릭하여 '허용'으로 설정한 후 실험을 시작해주세요.",
+                alertFail: "연결에 실패했습니다. 네트워크를 확인한 후 다시 시도해주세요!",
+                leaveWarning: "실험이 진행 중입니다. 페이지를 벗어나면 현재 진행 상황이 손실됩니다.",
+                studentPrefix: "학생 ",
+                classFormat: "{val}반",
+                studentFormat: "{val} 번",
+                sessionFormat: "제 {val} 세션"
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.title = i18n[lang].pageTitle;
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    el.textContent = i18n[lang][key];
+                }
+            });
+
+            // 动态更新下拉选项内部的中英文字段
+            document.querySelectorAll('#className-select .select-items div').forEach(div => {
+                const val = div.getAttribute('data-value');
+                div.textContent = i18n[lang].classFormat.replace('{val}', val);
+            });
+            const clsVal = document.getElementById('className').value;
+            document.querySelector('#className-select .select-selected').textContent = 
+                clsVal ? i18n[lang].classFormat.replace('{val}', clsVal) : i18n[lang].classSelect;
+
+            document.querySelectorAll('#studentId-select .select-items div').forEach(div => {
+                const val = div.getAttribute('data-value');
+                div.textContent = i18n[lang].studentFormat.replace('{val}', val);
+            });
+            const stuVal = document.getElementById('studentId').value;
+            document.querySelector('#studentId-select .select-selected').textContent = 
+                stuVal ? i18n[lang].studentFormat.replace('{val}', stuVal) : i18n[lang].studentIdSelect;
+
+            document.querySelectorAll('#sessionNum-select .select-items div').forEach(div => {
+                const val = div.getAttribute('data-value');
+                div.textContent = i18n[lang].sessionFormat.replace('{val}', val);
+            });
+            const sesVal = document.getElementById('sessionNum').value;
+            document.querySelector('#sessionNum-select .select-selected').textContent = 
+                sesVal ? i18n[lang].sessionFormat.replace('{val}', sesVal) : i18n[lang].sessionSelect;
+        }
+
+        // 防止学生意外关闭页面而丢失实验进度
+        window.onbeforeunload = function (event) {
+            if (!chatActive && !questionnaireDirty) return;
+            event.preventDefault();
+            event.returnValue = i18n[currentLang].leaveWarning;
+            return event.returnValue;
+        };
+
+        // ==========================================
+        // 自定义下拉列表功能
+        // 说明：原生的HTML select元素无法完全满足设计需求，
+        //      此函数创建了一个完全自定义样式的下拉菜单
+        // ==========================================
+        function initCustomSelects() {
+            // 获取页面中所有的自定义下拉列表元素
+            const customSelects = document.querySelectorAll('.custom-select');
+
+            customSelects.forEach(function (select) {
+                const selected = select.querySelector('.select-selected');      // 显示当前选项的元素
+                const items = select.querySelector('.select-items');            // 下拉菜单列表
+                const hiddenInput = select.nextElementSibling;                 // 存储选择值的隐藏输入框
+
+                // 点击显示框时展开/收起菜单
+                selected.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    closeAllSelect(this);
+                    this.classList.toggle('select-arrow-active');              // 改变箭头方向
+                    items.classList.toggle('select-hide');                     // 显示/隐藏菜单
+                });
+
+                // 在菜单中选择项目时，更新显示内容和隐藏值
+                items.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'DIV') {
+                        const value = e.target.getAttribute('data-value');
+                        const text = e.target.textContent;
+
+                        // 更新显示文本
+                        selected.textContent = text;
+                        // 在隐藏字段中保存实际值（供后续JavaScript使用）
+                        hiddenInput.value = value;
+
+                        // 捕捉语言选择事件，触发布局文字更新
+                        if (hiddenInput.id === 'lang') {
+                            switchLanguage(value);
+                        }
+
+                        // 更新视觉上的选中状态
+                        const allItems = items.querySelectorAll('div');
+                        allItems.forEach(item => item.classList.remove('same-as-selected'));
+                        e.target.classList.add('same-as-selected');
+
+                        // 选择完成后关闭菜单
+                        selected.classList.remove('select-arrow-active');
+                        items.classList.add('select-hide');
+                    }
+                });
+            });
+
+            // 辅助函数：关闭除指定外的所有下拉菜单
+            function closeAllSelect(elmnt) {
+                const items = document.querySelectorAll('.select-items');
+                const selected = document.querySelectorAll('.select-selected');
+                const arrNo = [];
+
+                selected.forEach(function (sel, index) {
+                    if (elmnt === sel) {
+                        arrNo.push(index);
+                    } else {
+                        sel.classList.remove('select-arrow-active');
+                    }
+                });
+
+                items.forEach(function (item, index) {
+                    if (arrNo.indexOf(index) === -1) {
+                        item.classList.add('select-hide');
+                    }
+                });
+            }
+
+            // 点击页面其他地方时关闭所有菜单
+            document.addEventListener('click', closeAllSelect);
+        }
+
+        // 页面加载完成后初始化所有自定义下拉菜单
+        document.addEventListener('DOMContentLoaded', initCustomSelects);
+
+        // ==========================================
+        // 核心函数：开始实验的完整流程
+        // ==========================================
+        async function startChat() {
+            if (chatStarting || chatActive) return;
+            const cls = document.getElementById('className').value;
+            const stu = document.getElementById('studentId').value.trim();
+            const ses = document.getElementById('sessionNum').value;
+            if (!cls) { alert(i18n[currentLang].alertClass); return; }
+            if (!stu) { alert(i18n[currentLang].alertStudent); return; }
+            if (!ses) { alert(i18n[currentLang].alertSession); return; }
+            if (!/^[1-8]$/.test(cls) || !/^([1-9]|[1-4][0-9]|5[0-5])$/.test(stu) || ses !== '1') {
+                alert(i18n[currentLang].alertConfig); return;
+            }
+
+            chatStarting = true;
+            const button = document.querySelector('#login-box button');
+            const inputGroup = document.getElementById('input-group');
+            const loader = document.getElementById('loader-wrapper');
+            const loginBox = document.getElementById('login-box');
+            const container = document.getElementById('coze-container');
+            button.disabled = true;
+            let client;
+            try {
+                if (window.CAITIAN_CONFIG?.questionnaireEnabled) {
+                    if (!window.CaitianQuestionnaire) throw new Error('Questionnaire resources unavailable');
+                    const completed = await window.CaitianQuestionnaire.open({
+                        userId: `${cls}班_${stu}_${ses}`, authUrl: window.CAITIAN_CONFIG.profileAuthUrl,
+                        loginBox, onDirty: value => { questionnaireDirty = value; }
+                    });
+                    if (!completed) return;
+                }
+                // Keep the school's chosen microphone requirement.
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                } catch (_) {
+                    alert(i18n[currentLang].alertMic);
+                    return;
+                }
+                if (!window.CozeWebSDK || !window.CaitianSession || !window.CAITIAN_CONFIG) {
+                    throw new Error('Classroom resources unavailable');
+                }
+                inputGroup.classList.add('fade-out');
+                await new Promise(resolve => setTimeout(resolve, 400));
+                inputGroup.style.display = 'none';
+                loader.style.display = 'flex';
+                document.getElementById('loading-text').innerText = i18n[currentLang].loadingInit;
+                const session = window.CaitianSession.createSession(
+                    window.CAITIAN_CONFIG, `${cls}班_${stu}_${ses}`, currentLang
+                );
+                const options = await session.options(container, `${i18n[currentLang].studentPrefix}${stu}`);
+                document.getElementById('loading-text').innerText = i18n[currentLang].loadingSuccess;
+                loginBox.classList.add('card-exit');
+                await new Promise(resolve => setTimeout(resolve, 600));
+                loginBox.style.display = 'none';
+                container.style.display = 'block';
+                container.classList.add('show-time');
+                client = new window.CozeWebSDK.WebChatClient(options);
+                await client.showChatBot();
+                chatActive = true;
+                // Students enter their own first message; no automatic input or send.
+            } catch (error) {
+                if (client && typeof client.destroy === 'function') {
+                    try { client.destroy(); } catch (_) { /* Restore the login screen even if SDK cleanup fails. */ }
+                }
+                container.replaceChildren();
+                container.style.display = 'none';
+                container.classList.remove('show-time');
+                loginBox.style.display = '';
+                loginBox.classList.remove('card-exit');
+                inputGroup.style.display = '';
+                inputGroup.classList.remove('fade-out');
+                loader.style.display = 'none';
+                if (error.code === 'PROFILE_NOT_READY') {
+                    alert(currentLang === 'zh' ? '课前资料尚未准备好，请联系老师。' : 'Please ask your teacher to prepare your lesson profile.');
+                } else {
+                    alert(i18n[currentLang].alertFail);
+                }
+            } finally {
+                chatStarting = false;
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

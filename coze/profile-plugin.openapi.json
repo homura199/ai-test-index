@@ -1,0 +1,28 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "小画君第一课时内部画像", "version": "1.0.0" },
+  "servers": [{ "url": "https://REPLACE_WITH_PROFILE_SCF_HOST" }],
+  "paths": {
+    "/internal/profile": {
+      "post": {
+        "operationId": "get_lesson_profile",
+        "summary": "从临时标识取得内部教学入口，不向学生展示返回结构",
+        "security": [{ "CozeServiceKey": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": {
+          "type": "object", "additionalProperties": false, "required": ["profile_ref"],
+          "properties": { "profile_ref": { "type": "string", "description": "绑定开始节点profile_ref，不从学生聊天抽取" } }
+        } } } },
+        "responses": { "200": { "description": "仅供Coze内部节点使用", "content": { "application/json": { "schema": {
+          "type": "object", "properties": { "data": { "type": "object", "properties": {
+            "lesson": { "type": "integer", "enum": [1] },
+            "preconception": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+            "entry_question": { "type": "string" }, "rubric_version": { "type": "string" }
+          } } }
+        } } } }, "401": { "description": "插件密钥或临时标识无效" }, "409": { "description": "问卷未就绪" } }
+      }
+    }
+  },
+  "components": { "securitySchemes": { "CozeServiceKey": {
+    "type": "apiKey", "in": "header", "name": "X-Coze-Plugin-Key"
+  } } }
+}
