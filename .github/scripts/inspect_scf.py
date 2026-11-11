@@ -12,7 +12,8 @@ from tencentcloud.scf.v20180416 import models, scf_client
 
 def main():
     client = scf_client.ScfClient(
-        credential.EnvironmentVariableCredential().get_credential(),
+        credential.Credential(os.environ['TENCENTCLOUD_SECRET_ID'].strip(),
+                              os.environ['TENCENTCLOUD_SECRET_KEY'].strip()),
         os.environ.get("TENCENTCLOUD_REGION", "ap-guangzhou"),
     )
     request = models.ListFunctionsRequest()
@@ -35,6 +36,8 @@ def main():
             "timeout": detail.Timeout,
             "status": detail.Status,
             "trigger_types": [t.Type for t in (detail.Triggers or [])],
+            "trigger_descriptions": [{"name": t.TriggerName, "type": t.Type,
+                                      "description": t.TriggerDesc} for t in (detail.Triggers or [])],
         })
     print(json.dumps({"region": client.region, "total": response.TotalCount, "functions": output}, ensure_ascii=False))
 
