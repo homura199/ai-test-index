@@ -2,6 +2,23 @@
 
 本包实现在线问卷和课前隐藏 AI 判级，不修改现有扣子智能体。新页面目录为 `caitian-ai/`，标准访问地址 `https://test.homura.cn/caitian-ai/index.html`。原网页及 `caitian.html` 保留。
 
+## 当前已部署设置（2026-11-11）
+
+| 项目 | 当前值 |
+| --- | --- |
+| SCF | 广州 / default / `caitian-lesson-one-profiles` |
+| 执行环境 | Python 3.10，`index.main_handler`，512MB，120秒 |
+| 私有桶 | `caitian-profiles-1308037263`，`ap-guangzhou`，私有读写，版本控制从未开启 |
+| 运行角色 | `CaitianLessonOneProfilesRole` |
+| 角色策略 | `CaitianLessonOnePrivateCOS`，仅课程目录读写和桶版本状态查询 |
+| HTTPS 函数 URL | `https://1308037263-7d4qlm2zrr.ap-guangzhou.tencentscf.com` |
+| 函数 URL 参数 | 默认流量、公网开启、参数兼容开启；网关层 CORS 关闭，由应用返回精确来源限制 |
+| 环境变量 | 下表七项必需/选用配置已保存，`COZE_ASSESSMENT_TOKEN` 未配置，复用现有鉴权 |
+
+身份签名密钥与管理密钥已在本机 `.private/caitian-scf-env.production.json` 备份，该文件被 Git 忽略，不随交付压缩包发布。不要重新生成 `IDENTITY_SECRET`，否则已有学生数据键名会改变。
+
+健康检查、跨域预检、管理接口未授权拒绝、非法来源和非法学号检查均通过。真实写入回环测试待确认空闲测试学号，前端提交入口暂保持关闭。
+
 ## 1. 上传 SCF 包
 
 在腾讯云广州地域新建独立函数 `caitian-lesson-one-profiles`，保留现有鉴权云函数。
@@ -55,7 +72,9 @@ python -c "import secrets; print(secrets.token_urlsafe(32)); print(secrets.token
 
 ## 4. HTTPS 入口
 
-为事件函数配置 HTTPS HTTP/API 网关触发器，保留 `httpMethod`、`path`、`headers`、字符串 `body`，使用集成响应（函数返回的 statusCode/headers/body）。网关若有 `/release` 前缀，映射时移除该前缀，或将下列路径正确映射到函数。网关和函数的响应超时必须覆盖同步判级，建议120秒；不能只设置函数120秒却让网关提前截断。所选产品不支持该时长时，先改异步任务再启用课堂。
+本次使用 SCF 控制台的“函数 URL”，绑定默认流量，开启公网访问与参数兼容，授权类型选择开放；应用自行保护管理接口和限制网页来源。参数兼容保留 `httpMethod`、`path`、`headers`、字符串 `body`，函数返回 `statusCode/headers/body`。网关层不再重复设置 CORS，应用只允许 `https://test.homura.cn`。参见[腾讯云函数 URL 文档](https://cloud.tencent.com/document/product/583/96099)。
+
+同步判级需保证入口和函数超时覆盖整次请求，函数已设120秒。当前使用腾讯云分配的测试 URL；正式长期使用时可在 SCF 自定义域名页面绑定自己的域名，并更新前端 `/auth` 地址。
 
 | 路径 | 用途与鉴权 |
 | --- | --- |
