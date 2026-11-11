@@ -13,11 +13,13 @@ from tools.stage_site import PUBLIC_FILES, stage
 def main():
     directory = Path('build/site')
     stage(Path.cwd(), directory)
-    client = CosS3Client(CosConfig(Region=os.environ['COS_REGION'],
-        SecretId=os.environ['TENCENTCLOUD_SECRET_ID'], SecretKey=os.environ['TENCENTCLOUD_SECRET_KEY'],
+    # Pasted Actions secrets may include a trailing newline. Normalize only
+    # surrounding whitespace; never print or persist credential values.
+    client = CosS3Client(CosConfig(Region=os.environ['COS_REGION'].strip(),
+        SecretId=os.environ['TENCENTCLOUD_SECRET_ID'].strip(), SecretKey=os.environ['TENCENTCLOUD_SECRET_KEY'].strip(),
         Scheme='https'))
     for name in PUBLIC_FILES:
-        client.put_object(Bucket=os.environ['COS_BUCKET'], Key=name,
+        client.put_object(Bucket=os.environ['COS_BUCKET'].strip(), Key=name,
             Body=(directory / name).read_bytes(),
             ContentType=(mimetypes.guess_type(name)[0] or 'application/octet-stream') + '; charset=utf-8',
             CacheControl='no-cache')

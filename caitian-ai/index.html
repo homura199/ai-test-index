@@ -286,14 +286,14 @@
         /* 2. 在文字前面强行塞一个 Emoji 或其他图标 */
         button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段一"] .coze-chat-sdk-semi-button-content::before {
             content: "📝";
-           
+
             font-size: 14px;
             margin-right: 4px;
             display: inline-block;
         }
                 button[data-testid="chat-area.chat-input-shortcut.shortcut-button-阶段二"] .coze-chat-sdk-semi-button-content::before {
             content: "📝";
-           
+
             font-size: 14px;
             margin-right: 4px;
             display: inline-block;
@@ -539,7 +539,7 @@
         function switchLanguage(lang) {
             currentLang = lang;
             document.title = i18n[lang].pageTitle;
-            
+
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (i18n[lang][key]) {
@@ -553,7 +553,7 @@
                 div.textContent = i18n[lang].classFormat.replace('{val}', val);
             });
             const clsVal = document.getElementById('className').value;
-            document.querySelector('#className-select .select-selected').textContent = 
+            document.querySelector('#className-select .select-selected').textContent =
                 clsVal ? i18n[lang].classFormat.replace('{val}', clsVal) : i18n[lang].classSelect;
 
             document.querySelectorAll('#studentId-select .select-items div').forEach(div => {
@@ -561,7 +561,7 @@
                 div.textContent = i18n[lang].studentFormat.replace('{val}', val);
             });
             const stuVal = document.getElementById('studentId').value;
-            document.querySelector('#studentId-select .select-selected').textContent = 
+            document.querySelector('#studentId-select .select-selected').textContent =
                 stuVal ? i18n[lang].studentFormat.replace('{val}', stuVal) : i18n[lang].studentIdSelect;
 
             document.querySelectorAll('#sessionNum-select .select-items div').forEach(div => {
@@ -569,7 +569,7 @@
                 div.textContent = i18n[lang].sessionFormat.replace('{val}', val);
             });
             const sesVal = document.getElementById('sessionNum').value;
-            document.querySelector('#sessionNum-select .select-selected').textContent = 
+            document.querySelector('#sessionNum-select .select-selected').textContent =
                 sesVal ? i18n[lang].sessionFormat.replace('{val}', sesVal) : i18n[lang].sessionSelect;
         }
 
