@@ -31,3 +31,7 @@
 - 用户确认8班55号可作为空闲测试位置并要求测试后清理。确认原问卷状态missing后，提交带有“部署回环测试”标识的虚构答案：接口200，约19.14秒返回ready。私有记录确认开放题70分、总分100、P3，来源为coze_semantic_dimensions。
 - `/auth` 返回200，bot_id为7706348792413011968，公开字段只有token、user_id_hash、profile_ref、bot_id。扣子999渠道回读确认Pn=3、P0=3；携带原profile_ref刷新令牌返回200且会话标识不变。测试脚本已恢复Pn/P0原值。
 - 新前端已接入 `https://1308037263-7d4qlm2zrr.ap-guangzhou.tencentscf.com/auth`，由Git推送发布到 `https://test.homura.cn/caitian-ai/`。
+- 对应提交876d11f的[GitHub Actions](https://github.com/homura199/ai-test-index/actions/runs/43010597472)验证、SCF打包与网站发布均成功；线上配置文件HTTP200且包含新/auth地址。
+- 再次通过匿名临时身份调用小画君API，无历史保存，Pn=3时收到完整答复，并包含“它画完一张，怎么知道自己画得像不像？谁告诉它的？”这一P3入口追问。
+- 线上浏览器选择8班55号、第1课次，读取真实后台后显示“课前问卷已完成，可以进入课堂”。点击进入后停在麦克风授权阶段，未完成浏览器内的聊天交互；没有绕过麦克风要求。API聊天回复和先前模拟接口下的SDK启动测试已通过，两者不等同于已验证真实浏览器整段聊天。
+- 测试后原Pn/P0/Ln/L0均已恢复并回读比较确认。仅删除清单中的三个精确对象（submissions、profiles、tickets各一个），COS显示成功3个、无遗留对象；状态接口再次返回200/missing，8班55号可正常重新填写。
