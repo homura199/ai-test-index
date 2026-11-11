@@ -17,7 +17,7 @@ function page({ denied = false, sdkFailure = false, questionnaire = null } = {})
                 remove: (...names) => names.forEach(n => classes.delete(n)), contains: n => classes.has(n) },
             replaceChildren() { this.cleared = true; } };
     }
-    elements.className.value = '8'; elements.studentId.value = '55'; elements.sessionNum.value = '1';
+    elements.className.value = '2'; elements.studentId.value = '55'; elements.sessionNum.value = '1';
     const window = { CAITIAN_CONFIG: { profileAuthUrl: 'https://profiles.example/auth', profileBotId: '7706348792413011968' },
         CaitianSession: { createSession: (config, identity, language) => createSession(config, identity, language,
             async () => { stats.auth++; return { ok: true, json: async () => ({ data: {
@@ -83,7 +83,7 @@ test('SDK initialization failure restores login and does not strand the loading 
 test('questionnaire completion gates microphone and chat startup', async () => {
     const cancelled = page({ questionnaire: () => false });
     await cancelled.context.startChat();
-    assert.equal(cancelled.stats.survey, '8班_55_1');
+    assert.equal(cancelled.stats.survey, '2班_55_1');
     assert.equal(cancelled.stats.mic, 0); assert.equal(cancelled.stats.auth, 0);
     const completed = page({ questionnaire: () => true });
     await completed.context.startChat();

@@ -313,12 +313,6 @@
                 <div class="select-items select-hide">
                     <div data-value="1">1班</div>
                     <div data-value="2">2班</div>
-                    <div data-value="3">3班</div>
-                    <div data-value="4">4班</div>
-                    <div data-value="5">5班</div>
-                    <div data-value="6">6班</div>
-                    <div data-value="7">7班</div>
-                    <div data-value="8">8班</div>
                 </div>
             </div>
             <input type="hidden" id="className" value="">
@@ -540,7 +534,7 @@
             if (!cls) { alert(i18n[currentLang].alertClass); return; }
             if (!stu) { alert(i18n[currentLang].alertStudent); return; }
             if (!ses) { alert(i18n[currentLang].alertSession); return; }
-            if (!/^[1-8]$/.test(cls) || !/^([1-9]|[1-4][0-9]|5[0-5])$/.test(stu) || ses !== '1') {
+            if (!/^[12]$/.test(cls) || !/^([1-9]|[1-4][0-9]|5[0-5])$/.test(stu) || ses !== '1') {
                 alert(i18n[currentLang].alertConfig); return;
             }
 
